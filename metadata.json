@@ -1,0 +1,6 @@
+{
+  "name": "ALMO AI",
+  "description": "Asistente financiero personal premium impulsado por IA. Controla tu patrimonio, ahorros, presupuestos e inversiones de forma inteligente con asesoramiento personalizado, simuladores y planes financieros.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

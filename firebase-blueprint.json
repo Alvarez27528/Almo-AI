@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Simple profile configuration containing name, goals, income, expenses, and other settings.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "age": { "type": "number" },
+        "country": { "type": "string" },
+        "currency": { "type": "string" },
+        "profession": { "type": "string" },
+        "workType": { "type": "string" },
+        "incomeFixed": { "type": "number" },
+        "incomeVariable": { "type": "number" },
+        "incomeBusiness": { "type": "number" },
+        "incomeOther": { "type": "number" },
+        "expenseHousing": { "type": "number" },
+        "expenseFood": { "type": "number" },
+        "expenseTransport": { "type": "number" },
+        "expenseSubscriptions": { "type": "number" },
+        "expenseLeisure": { "type": "number" },
+        "expenseEducation": { "type": "number" },
+        "expenseHealth": { "type": "number" },
+        "expenseTaxes": { "type": "number" },
+        "expenseOther": { "type": "number" },
+        "currentSavings": { "type": "number" },
+        "currentInvestments": { "type": "number" },
+        "debts": { "type": "number" },
+        "riskLevel": { "type": "string" },
+        "primaryGoals": { "type": "array" },
+        "businessSector": { "type": "string" }
+      },
+      "required": ["name", "age", "country", "currency", "workType"]
+    },
+    "AppState": {
+      "title": "AppState",
+      "description": "Full synchronized user account data, financial history, plans, assets and notifications.",
+      "type": "object",
+      "properties": {
+        "userProfile": { "$ref": "UserProfile" },
+        "transactions": { "type": "array" },
+        "goals": { "type": "array" },
+        "budgets": { "type": "array" },
+        "challenges": { "type": "array" },
+        "investments": { "type": "array" },
+        "vintedListings": { "type": "array" },
+        "calendarEvents": { "type": "array" },
+        "chatHistory": { "type": "array" },
+        "financialPlans": { "type": "array" },
+        "userXP": { "type": "number" },
+        "userLevel": { "type": "number" }
+      }
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "AppState",
+      "description": "User specific app state document containing all secure financial information."
+    }
+  }
+}
