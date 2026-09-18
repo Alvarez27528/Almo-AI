@@ -33,6 +33,7 @@ export default function Plans({ state, onAddPlan, onDeletePlan }: PlansProps) {
   const profile = state.userProfile!;
   const [showGeneratorModal, setShowGeneratorModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
 
   // Form states
   const [planType, setPlanType] = useState<'saving' | 'investment' | 'debt_payoff' | 'expense_cut' | 'car' | 'home' | 'business'>('saving');
@@ -52,6 +53,7 @@ export default function Plans({ state, onAddPlan, onDeletePlan }: PlansProps) {
   const handleGeneratePlan = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setGenError(null);
 
     try {
       const stats = calculateFinancialStats(state);
@@ -68,9 +70,8 @@ export default function Plans({ state, onAddPlan, onDeletePlan }: PlansProps) {
         })
       });
 
-      if (!response.ok) throw new Error('Plan generation failure');
-
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'No se pudo generar el plan.');
 
       const newPlan: FinancialPlan = {
         id: `plan-${Date.now()}`,
@@ -78,45 +79,16 @@ export default function Plans({ state, onAddPlan, onDeletePlan }: PlansProps) {
         type: planType,
         targetAmount: Number(targetAmount) || undefined,
         timeframeMonths: Number(timeframe) || 12,
-        actions: data.actions || [
-          'Reducir un 15% de gastos discrecionales en ocio y comidas fuera.',
-          'Automatizar aportación mensual recurrente a cuenta remunerada.',
-          'Configurar alertas de presupuesto al llegar al 80% del límite.',
-          'Auditar suscripciones duplicadas.'
-        ],
+        actions: data.actions,
         progressionPercent: 5, // Starts at 5% progress
-        simulationScenarios: data.simulationScenarios || {
-          optimistic: 'Rendimiento excelente acumulando plusvalías.',
-          moderate: 'Cumplimiento nominal de las metas planteadas.',
-          conservative: 'Ahorro base acumulado protegiendo contra la inflación.'
-        }
+        simulationScenarios: data.simulationScenarios
       };
 
       onAddPlan(newPlan);
       setShowGeneratorModal(false);
-    } catch (error) {
-      console.error('Plan generation failed:', error);
-      // Fallback
-      onAddPlan({
-        id: `plan-${Date.now()}`,
-        title: `Plan de Contingencia de ${planTypeLabels[planType]}`,
-        type: planType,
-        targetAmount: Number(targetAmount),
-        timeframeMonths: Number(timeframe),
-        actions: [
-          'Automatizar un 10% de ahorro del salario neto al inicio del mes.',
-          'Auditar suscripciones de ocio activas cancelando las redundantes.',
-          'Transferir excedente mensual a cartera indexada diversificada.',
-          'Revisar tarifas de suministros domésticos (luz, gas, internet) para recortar fijos.'
-        ],
-        progressionPercent: 10,
-        simulationScenarios: {
-          optimistic: 'Si aumentas el ahorro en un 5% extra, lograrás la meta un mes antes.',
-          moderate: 'Siguiendo el plan actual lograrás completar la meta en el tiempo estimado.',
-          conservative: 'En el peor de los casos acumulando ahorro neto cubrirás el 85% de la meta.'
-        }
-      });
-      setShowGeneratorModal(false);
+    } catch (error: any) {
+      console.error('Plan generation failed:', error?.message);
+      setGenError(error?.message || 'No se pudo generar el plan. Inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -325,6 +297,10 @@ export default function Plans({ state, onAddPlan, onDeletePlan }: PlansProps) {
                   />
                 </div>
               </div>
+
+              {genError && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center">{genError}</div>
+              )}
 
               {loading ? (
                 <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-center space-y-3 py-6">

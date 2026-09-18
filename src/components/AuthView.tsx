@@ -41,14 +41,11 @@ export default function AuthView() {
   const [recoveryStep, setRecoveryStep] = useState(1); // 1: email, 2: code & new password, 3: success
   const [recoveryCode, setRecoveryCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [recoveryDevCode, setRecoveryDevCode] = useState('');
 
   // Flow control states
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [verificationStep, setVerificationStep] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
-  const [isSmtpConfigured, setIsSmtpConfigured] = useState(true);
-  const [devVerificationCode, setDevVerificationCode] = useState('');
 
   const [rememberMe, setRememberMe] = useState(false);
   
@@ -147,13 +144,6 @@ export default function AuthView() {
         throw new Error(sendData.error || 'No se pudo enviar el código de verificación.');
       }
 
-      setIsSmtpConfigured(sendData.smtpConfigured !== false);
-      if (sendData.smtpConfigured === false && sendData.code) {
-        setDevVerificationCode(sendData.code);
-      } else {
-        setDevVerificationCode('');
-      }
-
       setVerificationStep(true);
     } catch (err: any) {
       console.error('Error al comprobar credenciales:', err);
@@ -211,13 +201,6 @@ export default function AuthView() {
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'No se pudo generar el código de recuperación.');
-      }
-
-      setIsSmtpConfigured(data.smtpConfigured !== false);
-      if (data.smtpConfigured === false && data.code) {
-        setRecoveryDevCode(data.code);
-      } else {
-        setRecoveryDevCode('');
       }
 
       setRecoveryStep(2); // Ir al paso de ingresar el código y nueva contraseña
@@ -511,18 +494,8 @@ export default function AuthView() {
           ) : recoveryStep === 2 ? (
             <form onSubmit={handleConfirmPasswordReset} className="space-y-4">
               <p className="text-xs text-slate-400 text-center leading-relaxed">
-                Hemos generado un código de recuperación seguro para <strong className="text-white">{recoveryEmail}</strong>.
+                Te hemos enviado un código de recuperación por correo a <strong className="text-white">{recoveryEmail}</strong>.
               </p>
-
-              {!isSmtpConfigured && recoveryDevCode && (
-                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs leading-relaxed space-y-1">
-                  <p className="font-bold text-amber-300">ℹ️ Código de recuperación generado:</p>
-                  <p>Para probar en desarrollo sin correo configurado, introduce este código:</p>
-                  <div className="font-mono text-center text-lg font-bold bg-slate-950/80 p-2 rounded-lg text-white tracking-widest mt-2 border border-white/5 select-all">
-                    {recoveryDevCode}
-                  </div>
-                </div>
-              )}
 
               <div className="space-y-4">
                 <div>
@@ -621,18 +594,8 @@ export default function AuthView() {
           /* Verification Code Screen */
           <form onSubmit={handleVerifyAndAuth} className="space-y-4">
             <p className="text-xs text-slate-400 text-center leading-relaxed">
-              Hemos generado un código de verificación para <strong className="text-white">{email}</strong>.
+              Te hemos enviado un código de verificación por correo a <strong className="text-white">{email}</strong>.
             </p>
-
-            {!isSmtpConfigured && devVerificationCode && (
-              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs leading-relaxed space-y-1">
-                <p className="font-bold text-amber-300">ℹ️ Código de verificación generado:</p>
-                <p>Para probar en desarrollo sin correo configurado, introduce este código:</p>
-                <div className="font-mono text-center text-lg font-bold bg-slate-950/80 p-2 rounded-lg text-white tracking-widest mt-2 border border-white/5 select-all">
-                  {devVerificationCode}
-                </div>
-              </div>
-            )}
 
             <div>
               <label className="block text-[10px] font-mono text-[#8E8E93] uppercase tracking-widest mb-2 text-center">

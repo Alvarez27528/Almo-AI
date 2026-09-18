@@ -246,18 +246,9 @@ app.post('/api/send-verification-code', async (req, res) => {
 
     const transporter = createMailTransport();
     if (!transporter) {
-      if (IS_PROD) {
-        console.error('[VERIFICATION CODE] SMTP no configurado en producción.');
-        return res.status(503).json({ error: 'El servicio de correo no está disponible temporalmente.' });
-      }
-      console.log(`[VERIFICATION CODE][DEV] Código para ${email}: ${code} (Intent: ${intent})`);
-      // Dev only: surface the code so the flow can be tested without SMTP
-      return res.json({
-        success: true,
-        smtpConfigured: false,
-        code,
-        message: 'Código generado (Modo de desarrollo: SMTP no configurado, se muestra el código directamente).'
-      });
+      verificationCodes.delete(email);
+      console.error('[VERIFICATION CODE] SMTP no configurado: no se puede enviar el código.');
+      return res.status(503).json({ error: 'El servicio de correo no está disponible en este momento. Inténtalo más tarde.' });
     }
     const smtpUser = process.env.SMTP_USER!;
 
@@ -426,17 +417,9 @@ app.post('/api/request-password-reset', async (req, res) => {
 
     const transporter = createMailTransport();
     if (!transporter) {
-      if (IS_PROD) {
-        console.error('[PASSWORD RESET] SMTP no configurado en producción.');
-        return res.status(503).json({ error: 'El servicio de correo no está disponible temporalmente.' });
-      }
-      console.log(`[PASSWORD RESET CODE][DEV] Código para ${emailKey}: ${code}`);
-      return res.json({
-        success: true,
-        smtpConfigured: false,
-        code,
-        message: 'Código de recuperación generado (Desarrollo: SMTP no configurado, se muestra en pantalla).'
-      });
+      passwordResetCodes.delete(emailKey);
+      console.error('[PASSWORD RESET] SMTP no configurado: no se puede enviar el código.');
+      return res.status(503).json({ error: 'El servicio de correo no está disponible en este momento. Inténtalo más tarde.' });
     }
     const smtpUser = process.env.SMTP_USER!;
 
@@ -909,9 +892,38 @@ async function retryGenerateContent(fn: () => Promise<any>, retries = 4, delay =
 }
 
 // 2. DAILY AI TIP
+const tipCache = new Map<string, { tip: string; expiresAt: number }>();
+
 app.post('/api/gemini/tip', async (req, res) => {
-  // Retornamos un consejo fijo (sin gastar tokens) para ahorrar saldo de la API.
-  res.json({ tip: '💡 Revisa tus suscripciones activas este mes. Automatizar un 10% de ahorro el día que recibes tu salario fijo es el método más fiable para acelerar tu libertad financiera.' });
+  try {
+    const { profile, stats } = req.body ?? {};
+    if (!profile || typeof profile !== 'object') return res.status(400).json({ error: 'Perfil requerido.' });
+
+    // Cache per user/situation for 12h so the daily tip doesn't burn tokens on every render
+    const cacheKey = `${profile.email || profile.name || 'anon'}:${Math.round(Number(stats?.totalExpenses) || 0)}:${Math.round(Number(stats?.availableCash) || 0)}`;
+    const cached = tipCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) return res.json({ tip: cached.tip });
+
+    const ai = getGeminiClient();
+    const prompt = `Eres ALMO AI, asesor financiero personal. Con estos datos reales del usuario genera UN solo consejo accionable, concreto y personalizado (máximo 45 palabras, en español, sin saludos ni emojis, tono cercano y profesional).
+Perfil: nombre ${profile.name || 'Usuario'}, ${profile.age || 'N/A'} años, ${profile.profession || 'profesional'}, ${profile.workType || ''}, país ${profile.country || 'España'}, moneda ${profile.currency || 'EUR'}, riesgo ${profile.riskLevel || 'moderado'}.
+Ingresos fijos: ${profile.incomeFixed ?? 'N/A'}. Ingresos variables: ${profile.incomeVariable ?? 'N/A'}. Ahorros: ${profile.currentSavings ?? 'N/A'}.
+Mes actual -> ingresos: ${stats?.totalIncome ?? 0}, gastos: ${stats?.totalExpenses ?? 0}, saldo disponible: ${stats?.availableCash ?? 0}, gastos mes anterior: ${stats?.previousMonthExpenses ?? 0}, tasa de ahorro: ${stats?.savingsRate ?? 'N/A'}%.`;
+
+    const response = await retryGenerateContent(() => ai.models.generateContent({
+      model: 'gemini-3.5-flash',
+      contents: prompt,
+    }), 2, 1500);
+
+    const tip = (response.text || '').trim().replace(/^["“]|["”]$/g, '');
+    if (!tip) throw new Error('empty');
+    tipCache.set(cacheKey, { tip, expiresAt: Date.now() + 12 * 60 * 60 * 1000 });
+    if (tipCache.size > 5000) tipCache.clear();
+    res.json({ tip });
+  } catch (error: any) {
+    console.error('Error in AI Tip API:', error?.message);
+    res.status(isQuotaOrDemandError(error) ? 503 : 500).json({ error: 'No se pudo generar el consejo en este momento.' });
+  }
 });
 
 // 3. AI RECEIPT SCANNER (SIMULATED MULTIMODAL CAPABILITY)
@@ -990,7 +1002,7 @@ app.get('/api/gemini/scan/usage', async (req, res) => {
 app.post('/api/gemini/scan', async (req, res) => {
   let rawText = '';
   try {
-    const { imageBase64, mockReceiptType, userEmail, userId } = req.body ?? {};
+    const { imageBase64, userEmail, userId } = req.body ?? {};
     const identifier = (typeof userId === 'string' && userId.slice(0, 128)) || normalizeEmail(userEmail);
     if (!identifier) {
       return res.status(400).json({ error: 'Email or UserID required' });
@@ -1060,163 +1072,9 @@ app.post('/api/gemini/scan', async (req, res) => {
       return res.status(403).json({ error: `Has alcanzado el límite diario de ${scanLimit} escaneos. Completa más retos para aumentar tu límite.` });
     }
 
-    // Si no hay imagen (modo demo/simulación), retornamos datos fijos para no gastar tokens
     if (!imageBase64) {
-      // Update scan usage
-      userUsage.count++;
-      scanUsage.set(identifier, userUsage);
-      
-      if (mockReceiptType === 'restaurant') {
-        return res.json({
-          merchant: 'Restaurante El Celler',
-          date: new Date().toISOString().split('T')[0],
-          products: [
-            { name: 'Menú Degustación', price: 45.00, quantity: 2 },
-            { name: 'Vino Tinto', price: 24.50, quantity: 1 }
-          ],
-          tax: 11.45,
-          total: 114.50,
-          category: 'Ocio',
-          establishmentType: 'Restaurante',
-          detectedLanguage: 'Español'
-        });
-      } else if (mockReceiptType === 'english_restaurant') {
-        return res.json({
-          merchant: 'The Golden Lion Pub',
-          date: new Date().toISOString().split('T')[0],
-          products: [
-            { name: 'Traditional Fish & Chips', price: 18.50, quantity: 2 },
-            { name: 'Craft Pint of IPA', price: 6.50, quantity: 4 }
-          ],
-          tax: 6.30,
-          total: 63.00,
-          category: 'Ocio',
-          establishmentType: 'Restaurante',
-          detectedLanguage: 'Inglés'
-        });
-      } else if (mockReceiptType === 'french_restaurant') {
-        return res.json({
-          merchant: 'Le Petit Bistro Paris',
-          date: new Date().toISOString().split('T')[0],
-          products: [
-            { name: 'Soupe à l’oignon (Sopa de cebolla)', price: 12.00, quantity: 2 },
-            { name: 'Entrecôte Frites (Filete con patatas)', price: 24.00, quantity: 2 },
-            { name: 'Bouteille de Bordeaux (Botella de vino)', price: 35.00, quantity: 1 }
-          ],
-          tax: 10.70,
-          total: 107.00,
-          category: 'Ocio',
-          establishmentType: 'Restaurante',
-          detectedLanguage: 'Francés'
-        });
-      } else if (mockReceiptType === 'catalan_restaurant') {
-        return res.json({
-          merchant: 'La Taberna de Gràcia',
-          date: new Date().toISOString().split('T')[0],
-          products: [
-            { name: 'Torrada d’escalivada i anxoves', price: 9.50, quantity: 2 },
-            { name: 'Butifarra amb mongetes', price: 14.50, quantity: 2 },
-            { name: 'Crema Catalana', price: 5.50, quantity: 2 }
-          ],
-          tax: 5.90,
-          total: 59.00,
-          category: 'Ocio',
-          establishmentType: 'Restaurante',
-          detectedLanguage: 'Catalán'
-        });
-      } else if (mockReceiptType === 'basque_restaurant') {
-        return res.json({
-          merchant: 'Donostiako Pintxo Taberna',
-          date: new Date().toISOString().split('T')[0],
-          products: [
-            { name: 'Pintxo de Tortilla', price: 3.50, quantity: 4 },
-            { name: 'Txuleta de Buey (Chuletón)', price: 42.00, quantity: 1 },
-            { name: 'Pull de Sagardoa (Sidra Vasca)', price: 4.00, quantity: 3 }
-          ],
-          tax: 6.80,
-          total: 68.00,
-          category: 'Ocio',
-          establishmentType: 'Restaurante',
-          detectedLanguage: 'Euskera'
-        });
-      } else if (mockReceiptType === 'german_supermarket') {
-        return res.json({
-          merchant: 'LIDL München',
-          date: new Date().toISOString().split('T')[0],
-          products: [
-            { name: 'Bio-Vollmilch (Leche entera)', price: 1.45, quantity: 2 },
-            { name: 'Deutsches Brot (Pan alemán)', price: 2.80, quantity: 1 },
-            { name: 'Bayerische Wurst (Salchichas)', price: 4.50, quantity: 2 }
-          ],
-          tax: 1.05,
-          total: 15.00,
-          category: 'Alimentación',
-          establishmentType: 'Supermercado',
-          detectedLanguage: 'Alemán'
-        });
-      } else if (mockReceiptType === 'english_supermarket') {
-        return res.json({
-          merchant: 'Tesco London Superstore',
-          date: new Date().toISOString().split('T')[0],
-          products: [
-            { name: 'Fresh British Milk 4 Pint', price: 1.65, quantity: 2 },
-            { name: 'Sliced Wholemeal Bread', price: 1.20, quantity: 1 },
-            { name: 'Cheddar Cheese 400g', price: 3.50, quantity: 1 },
-            { name: 'Fresh Bananas 5-pack', price: 1.00, quantity: 1 }
-          ],
-          tax: 0.90,
-          total: 9.00,
-          category: 'Alimentación',
-          establishmentType: 'Supermercado',
-          detectedLanguage: 'Inglés'
-        });
-      } else if (mockReceiptType === 'uber') {
-        return res.json({
-          merchant: 'Uber Rent',
-          date: new Date().toISOString().split('T')[0],
-          products: [
-            { name: 'Viaje Aeropuerto T4', price: 32.40, quantity: 1 }
-          ],
-          tax: 3.24,
-          total: 32.40,
-          category: 'Transporte',
-          establishmentType: 'Otros',
-          detectedLanguage: 'Inglés'
-        });
-      } else if (mockReceiptType === 'cloud') {
-        return res.json({
-          merchant: 'Amazon Web Services',
-          date: new Date().toISOString().split('T')[0],
-          products: [
-            { name: 'EC2 t3.micro', price: 12.00, quantity: 1 },
-            { name: 'RDS PostgreSQL', price: 28.50, quantity: 1 }
-          ],
-          tax: 8.50,
-          total: 49.00,
-          category: 'Suscripciones',
-          establishmentType: 'Otros',
-          detectedLanguage: 'Inglés'
-        });
-      } else {
-        return res.json({
-          merchant: 'Mercadona Supermercados',
-          date: new Date().toISOString().split('T')[0],
-          products: [
-            { name: 'Fruta variada y verduras', price: 12.40, quantity: 1 },
-            { name: 'Pechuga de pollo fileteada', price: 6.50, quantity: 2 }
-          ],
-          tax: 2.54,
-          total: 25.40,
-          category: 'Alimentación',
-          establishmentType: 'Supermercado',
-          detectedLanguage: 'Español'
-        });
-      }
+      return res.status(400).json({ error: 'Debes adjuntar la foto del ticket para analizarlo.' });
     }
-    
-    // Update scan usage for real scan
-    userUsage.count++;
-    scanUsage.set(userEmail, userUsage);
 
     const ai = getGeminiClient();
 
@@ -1283,35 +1141,60 @@ app.post('/api/gemini/scan', async (req, res) => {
       console.error('Raw text that failed parsing:', rawText);
     }
     if (isQuotaOrDemandError(error)) {
-       return res.json({ 
-        merchant: 'Escaneo Manual (Sistema ocupado)',
-        date: new Date().toISOString().split('T')[0],
-        products: [{ name: 'Producto escaneado manualmente', price: 0.00, quantity: 1 }],
-        tax: 0,
-        total: 0,
-        category: 'Otros'
-      });
+      return res.status(503).json({ error: 'El motor de IA está saturado en este momento. Inténtalo de nuevo en un minuto.' });
     }
     res.status(500).json({ error: publicError(error, 'No se pudo analizar el ticket.') });
   }
 });
 
-// 4. PLAN GENERATION
+// 4. PLAN GENERATION (real, structured output)
 app.post('/api/gemini/plan', async (req, res) => {
-  res.json({
-    title: `Plan de Optimización Financiera Premium (${req.body?.type === 'saving' ? 'Ahorro' : 'Inversión'})`,
-    actions: [
-      'Automatizar una transferencia del 15% del salario neto a una cuenta de ahorros remunerada al inicio del mes.',
-      'Auditar y cancelar un 20% de suscripciones de ocio inactivas (ahorro estimado de 45€/mes).',
-      'Invertir la aportación sobrante mensual en un fondo indexado global de bajo coste (ej. Vanguard Global Stock Index).',
-      'Revisar las pólizas de seguros activos (salud, coche, hogar) para negociar mejores primas antes de la renovación.'
-    ],
-    simulationScenarios: {
-      optimistic: 'Si aumentas tus aportaciones adicionales en un 10% y el mercado rinde a un 9% anual, tu capital proyectado crecerá de forma exponencial superando tu objetivo holgadamente.',
-      moderate: 'Siguiendo el plan base de ahorro continuo y rentabilidad del 5.5% anual, lograrás el 100% de tu objetivo en el plazo estimado de forma segura.',
-      conservative: 'En caso de imprevistos o estancamiento de mercado con rentabilidad nula, el ahorro neto acumulado te garantizará cubrir al menos el 80% de tu meta planteada.'
-    }
-  });
+  try {
+    const { type, targetAmount, timeframeMonths, profile, stats } = req.body ?? {};
+    const planType = typeof type === 'string' && /^[a-z_]{1,30}$/.test(type) ? type : 'saving';
+    const ai = getGeminiClient();
+
+    const prompt = `Eres ALMO AI, asesor financiero fiduciario. Diseña un plan financiero personalizado y realista en español.
+Tipo de plan: ${planType}. Objetivo: ${Number(targetAmount) || 'no definido'} ${profile?.currency || 'EUR'}. Plazo: ${Number(timeframeMonths) || 12} meses.
+Perfil: ${profile?.name || 'Usuario'}, ${profile?.age || 'N/A'} años, ${profile?.profession || 'profesional'} (${profile?.workType || ''}), país ${profile?.country || 'España'}, tolerancia al riesgo ${profile?.riskLevel || 'moderada'}.
+Ingresos fijos ${profile?.incomeFixed ?? 'N/A'}, variables ${profile?.incomeVariable ?? 'N/A'}, ahorros actuales ${profile?.currentSavings ?? 'N/A'}.
+Situación del mes: ingresos ${stats?.totalIncome ?? 0}, gastos ${stats?.totalExpenses ?? 0}, saldo disponible ${stats?.availableCash ?? 0}, tasa de ahorro ${stats?.savingsRate ?? 'N/A'}%.
+Devuelve: un título corto, entre 4 y 6 acciones concretas con cifras calculadas a partir de los datos (importe mensual necesario, porcentajes, etc.) y tres escenarios (optimista, moderado, conservador) de 1-2 frases cada uno. Sin emojis.`;
+
+    const response = await retryGenerateContent(() => ai.models.generateContent({
+      model: 'gemini-3.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING },
+            actions: { type: Type.ARRAY, items: { type: Type.STRING } },
+            simulationScenarios: {
+              type: Type.OBJECT,
+              properties: {
+                optimistic: { type: Type.STRING },
+                moderate: { type: Type.STRING },
+                conservative: { type: Type.STRING },
+              },
+              required: ['optimistic', 'moderate', 'conservative'],
+            },
+          },
+          required: ['title', 'actions', 'simulationScenarios'],
+        },
+      },
+    }), 3, 1500);
+
+    let raw = response.text || '{}';
+    if (raw.includes('```')) raw = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const plan = JSON.parse(raw);
+    if (!Array.isArray(plan.actions) || plan.actions.length === 0) throw new Error('invalid plan');
+    res.json(plan);
+  } catch (error: any) {
+    console.error('Error in Plan API:', error?.message);
+    res.status(isQuotaOrDemandError(error) ? 503 : 500).json({ error: 'No se pudo generar el plan en este momento. Inténtalo de nuevo.' });
+  }
 });
 
 

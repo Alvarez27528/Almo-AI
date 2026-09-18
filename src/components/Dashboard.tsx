@@ -166,14 +166,7 @@ export default function Dashboard({
     };
   });
 
-  const finalMovementsData = hasMovements ? movementsChartData : [
-    { fecha: '12/07', concepto: 'Nómina Recibida', monto: 1800, tipo: 'income', categoria: 'Trabajo' },
-    { fecha: '14/07', concepto: 'Alquiler Piso', monto: -650, tipo: 'expense', categoria: 'Vivienda' },
-    { fecha: '16/07', concepto: 'Supermercado', monto: -120, tipo: 'expense', categoria: 'Alimentación' },
-    { fecha: '18/07', concepto: 'Cena Amigos', monto: -45, tipo: 'expense', categoria: 'Ocio' },
-    { fecha: '19/07', concepto: 'Venta Pyme', monto: 120, tipo: 'income', categoria: 'Trabajo' },
-    { fecha: '20/07', concepto: 'Suscripción Netflix', monto: -18, tipo: 'expense', categoria: 'Suscripciones' },
-  ];
+  const finalMovementsData = movementsChartData;
 
 
   return (
@@ -301,12 +294,16 @@ export default function Dashboard({
                     <div className="h-1.5 w-1.5 bg-[#00FF66] rounded-full" />
                     <div className="h-1.5 w-1.5 bg-[#00FF66] rounded-full" />
                   </div>
-                  <span className="text-xs text-[#00FF66] font-mono">Generando recomendación de cartera...</span>
+                  <span className="text-xs text-[#8E8E93]">Analizando tus finanzas...</span>
                 </div>
-              ) : (
+              ) : aiTip ? (
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[#D1D1D6] text-[14px] leading-relaxed">
-                  "{aiTip}"
+                  {aiTip}
                 </motion.p>
+              ) : (
+                <p className="text-[#8E8E93] text-[13px] leading-relaxed">
+                  Registra tus primeros movimientos y ALMO AI generará una recomendación personalizada con tus datos reales.
+                </p>
               )}
             </div>
 
@@ -378,11 +375,6 @@ export default function Dashboard({
                   Estadísticas detalladas de tus gastos y flujo de movimientos.
                 </p>
               </div>
-              {!hasMovements && (
-                <span className="text-[9px] font-mono font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
-                  Vista con datos de ejemplo
-                </span>
-              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

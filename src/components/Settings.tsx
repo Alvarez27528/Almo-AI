@@ -110,11 +110,6 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
         throw new Error(data.error || 'Error al enviar código');
       }
 
-      if (data.smtpConfigured === false && data.code) {
-        // Fallback para desarrollo si SMTP no está configurado
-        alert(`Modo desarrollo: El código es ${data.code} (revisa la consola)`);
-      }
-
       setTimeout(() => {
         setResetPinEmailSent(false);
         setShowVerification(true);

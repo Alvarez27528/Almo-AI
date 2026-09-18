@@ -116,7 +116,6 @@ testConnection();
 
 import { AppState, UserProfile, Transaction, InvestmentAsset, CalendarEvent, Challenge, FinancialPlan, ChatMessage, Budget } from './types';
 import { calculateFinancialStats, formatCurrency } from './utils/finance';
-import { getSeededState } from './data/mockData';
 import { getDailyChallengeIds, CHALLENGES_POOL } from './utils/challenges';
 
 import { 
@@ -240,7 +239,7 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', onVisibility);
   }, [activeTab, state.userProfile?.securityPin, state.userProfile?.protectedTabs]);
 
-  const [aiTip, setAiTip] = useState('Tu nivel de liquidez es saludable. Te sugerimos destinar un 10% extra a indexados este mes para maximizar interés compuesto.');
+  const [aiTip, setAiTip] = useState('');
   const [loadingTip, setLoadingTip] = useState(true);
 
   // Safety timeout for initial auth load (prevent hanging forever in iframe)
@@ -284,22 +283,6 @@ export default function App() {
         if (cachedDataStr) {
           try {
             const cachedData = JSON.parse(cachedDataStr) as AppState;
-            if (firebaseUser.email === 'marioam777@gmail.com') {
-              if (!cachedData.transactions) cachedData.transactions = [];
-              const hasTx = cachedData.transactions.some((t: any) => t.amount === 35.1);
-              if (!hasTx) {
-                cachedData.transactions.unshift({
-                  id: 'tx-mario-351',
-                  amount: 35.1,
-                  type: 'income',
-                  date: new Date().toISOString().split('T')[0],
-                  category: 'Otros ingresos',
-                  description: 'Ingreso Extra Realizado (35.10 €)',
-                  paymentMethod: 'Tarjeta Apple Pay',
-                  notes: 'Transacción añadida automáticamente para balancear la cuenta de Mario'
-                });
-              }
-            }
             setState(cachedData);
             setInitialLoadDone(true);
             setAuthLoading(false); // Disable spinner instantly!
@@ -321,22 +304,6 @@ export default function App() {
 
             if (docSnap && docSnap.exists()) {
             const userData = docSnap.data() as AppState;
-            if (firebaseUser.email === 'marioam777@gmail.com') {
-              if (!userData.transactions) userData.transactions = [];
-              const hasTx = userData.transactions.some((t: any) => t.amount === 35.1);
-              if (!hasTx) {
-                userData.transactions.unshift({
-                  id: 'tx-mario-351',
-                  amount: 35.1,
-                  type: 'income',
-                  date: new Date().toISOString().split('T')[0],
-                  category: 'Otros ingresos',
-                  description: 'Ingreso Extra Realizado (35.10 €)',
-                  paymentMethod: 'Tarjeta Apple Pay',
-                  notes: 'Transacción añadida automáticamente para balancear la cuenta de Mario'
-                });
-              }
-            }
             const updatedState = {
               ...userData,
               userRank: userData.userRank || 'Normal',
@@ -472,12 +439,12 @@ export default function App() {
         });
         if (response.ok) {
           const data = await response.json();
-          if (data.tip) {
-            setAiTip(data.tip);
-          }
+          if (data.tip) setAiTip(data.tip);
+        } else {
+          setAiTip('');
         }
       } catch (e) {
-        console.error('Failed to fetch AI tip:', e);
+        setAiTip('');
       } finally {
         setLoadingTip(false);
       }

@@ -75,7 +75,7 @@ export default function AIScanner({ state, onSaveScannedTransaction, onNavigateT
     }
   };
 
-  const startScanning = async (mockType?: string) => {
+  const startScanning = async () => {
     setScanning(true);
     setResult(null);
     setError(null);
@@ -100,8 +100,7 @@ export default function AIScanner({ state, onSaveScannedTransaction, onNavigateT
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageBase64: mockType ? null : imageFile,
-          mockReceiptType: mockType || null,
+          imageBase64: imageFile,
           userEmail: auth.currentUser?.email || 'anonymous',
           userId: auth.currentUser?.uid || ''
         })
