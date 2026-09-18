@@ -82,25 +82,25 @@ export default function Challenges({ state, onClaimChallenge }: ChallengesProps)
         </div>
 
         {/* Status Indicators */}
-        <div className="flex items-center space-x-3 bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-2xl w-full md:w-auto shrink-0 shadow-lg">
+        <div className="flex items-center space-x-3 bg-[#0E0E10] border border-white/[0.06] px-4 py-2.5 rounded-2xl w-full md:w-auto shrink-0 shadow-lg">
           <div className="p-1.5 rounded-lg bg-amber-400/10 text-amber-400">
             <Zap size={16} className="fill-amber-400" />
           </div>
           <div>
             <span className="text-[10px] text-slate-500 font-mono block uppercase tracking-wider">Estatus de Disciplina</span>
-            <span className="text-xs font-extrabold text-slate-200">Nivel {state.userLevel} (Premium)</span>
+            <span className="text-xs font-semibold text-slate-200">Nivel {state.userLevel} (Premium)</span>
           </div>
         </div>
       </div>
 
       {/* Daily Rotation countdown and Info block */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 bg-gradient-to-r from-[#070D19] via-[#091C14] to-[#060D0A] border border-[#00FF66]/15 p-5 rounded-3xl flex items-center gap-4 shadow-xl">
+        <div className="md:col-span-2 bg-gradient-to-r from-[#070D19] via-[#091C14] to-[#060D0A] border border-[#00FF66]/15 p-5 rounded-[28px] flex items-center gap-4 shadow-xl">
           <div className="p-3 bg-[#00FF66]/10 text-[#00FF66] rounded-2xl border border-[#00FF66]/20 shadow-[0_0_15px_rgba(0,255,102,0.1)] shrink-0">
             <Sparkles size={22} className="animate-pulse" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-extrabold text-white">
+            <h3 className="text-sm font-semibold text-white">
               ¡Misiones de Acción Automáticas!
             </h3>
             <p className="text-xs text-slate-300 leading-normal font-sans">
@@ -109,13 +109,13 @@ export default function Challenges({ state, onClaimChallenge }: ChallengesProps)
           </div>
         </div>
 
-        <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-3xl flex items-center gap-4">
+        <div className="bg-slate-900/60 border border-slate-800 p-5 rounded-[28px] flex items-center gap-4">
           <div className="p-3 bg-amber-400/10 text-amber-400 rounded-2xl border border-amber-400/20 shrink-0">
             <Clock size={20} className="animate-spin-slow" />
           </div>
           <div className="space-y-1">
             <span className="text-[10px] text-slate-500 font-mono uppercase block tracking-wider">Próximo Reinicio</span>
-            <span className="text-sm font-extrabold text-white block">{getHoursToMidnight()}</span>
+            <span className="text-sm font-semibold text-white block">{getHoursToMidnight()}</span>
             <span className="text-[10px] text-amber-400 font-medium block">Nuevas misiones en 24h</span>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function Challenges({ state, onClaimChallenge }: ChallengesProps)
 
           <div className="space-y-4">
             {isMaxLevelReached ? (
-              <div className="p-10 text-center bg-gradient-to-tr from-amber-500/10 to-amber-900/20 border border-amber-500/30 rounded-3xl">
+              <div className="p-10 text-center bg-gradient-to-tr from-amber-500/10 to-amber-900/20 border border-amber-500/30 rounded-[28px]">
                 <Trophy className="mx-auto text-amber-400 mb-3 animate-bounce" size={32} />
                 <h3 className="text-lg font-bold text-white mb-2">¡Nivel Máximo Completado!</h3>
                 <p className="text-sm text-slate-300 font-sans">
@@ -141,7 +141,7 @@ export default function Challenges({ state, onClaimChallenge }: ChallengesProps)
                 </p>
               </div>
             ) : activeChallenges.length === 0 ? (
-              <div className="p-10 text-center bg-slate-900 border border-slate-850 rounded-3xl">
+              <div className="p-10 text-center bg-slate-900 border border-slate-850 rounded-[28px]">
                 <Clock className="mx-auto text-slate-600 mb-2.5 animate-pulse" size={28} />
                 <p className="text-xs text-slate-400 font-sans">Sincronizando tus dos misiones diarias. Espera un instante...</p>
               </div>
@@ -153,7 +153,7 @@ export default function Challenges({ state, onClaimChallenge }: ChallengesProps)
                 return (
                   <div 
                     key={ch.id} 
-                    className={`p-5.5 rounded-3xl border transition-all flex flex-col justify-between ${
+                    className={`p-5.5 rounded-[28px] border transition-all flex flex-col justify-between ${
                       ch.isCompleted 
                         ? 'bg-slate-950/20 border-slate-900/40 opacity-60' 
                         : isReadyToClaim
@@ -261,7 +261,7 @@ export default function Challenges({ state, onClaimChallenge }: ChallengesProps)
               <motion.div 
                 initial={{ scale: 0.8, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
-                className="bg-slate-900 border border-amber-500/30 p-8 rounded-3xl text-center shadow-2xl max-w-sm w-full"
+                className="bg-slate-900 border border-amber-500/30 p-8 rounded-[28px] text-center shadow-2xl max-w-sm w-full"
               >
                 <div className="mx-auto w-16 h-16 bg-amber-400/20 rounded-full flex items-center justify-center mb-6">
                   <Trophy className="text-amber-400" size={32} />
@@ -284,7 +284,7 @@ export default function Challenges({ state, onClaimChallenge }: ChallengesProps)
         <div className="space-y-5">
           <h2 className="text-xs font-mono text-slate-500 uppercase tracking-widest block font-bold">Insignias de Estatus Financiero</h2>
 
-          <div className="bg-slate-900 border border-slate-800 p-5.5 rounded-3xl space-y-4 shadow-xl">
+          <div className="bg-[#0E0E10] border border-white/[0.06] p-5.5 rounded-[28px] space-y-4 shadow-xl">
             
             <div className="space-y-3.5">
               {badges.map((b, idx) => (
@@ -309,7 +309,7 @@ export default function Challenges({ state, onClaimChallenge }: ChallengesProps)
 
             <div className="pt-4 border-t border-slate-850/60 text-center">
               <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block mb-1">Rango Actual de Estatus</span>
-              <span className="text-xs font-extrabold text-amber-400 flex items-center justify-center gap-1">
+              <span className="text-xs font-semibold text-amber-400 flex items-center justify-center gap-1">
                 <Award size={13} className="text-amber-400 fill-amber-400" />
                 Inversor Inteligente Certificado
               </span>
@@ -318,7 +318,7 @@ export default function Challenges({ state, onClaimChallenge }: ChallengesProps)
           </div>
 
           {/* Gamification philosophy card */}
-          <div className="bg-gradient-to-r from-slate-900 to-amber-950/5 border border-slate-850 p-5 rounded-3xl space-y-3">
+          <div className="bg-gradient-to-r from-slate-900 to-amber-950/5 border border-slate-850 p-5 rounded-[28px] space-y-3">
             <div className="flex items-center space-x-1.5 text-amber-400 font-mono text-xs uppercase tracking-wider font-bold">
               <Star size={13} className="fill-amber-400" />
               <span>CONSTANCIA ALMO AI</span>

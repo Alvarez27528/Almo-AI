@@ -1,50 +1,143 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Apple-like easing curves */
+  --ease-apple: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-shake: shake 0.45s var(--ease-apple);
+  --animate-fade-up: fade-up 0.5s var(--ease-apple) both;
+  --animate-shimmer: shimmer 2.2s linear infinite;
+  --animate-aurora: aurora 18s ease-in-out infinite alternate;
+
+  @keyframes shake {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(2px); }
+    30%, 50%, 70% { transform: translateX(-4px); }
+    40%, 60% { transform: translateX(4px); }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes aurora {
+    0% { transform: translate3d(-8%, -6%, 0) scale(1); }
+    50% { transform: translate3d(6%, 4%, 0) scale(1.12); }
+    100% { transform: translate3d(-4%, 8%, 0) scale(1.04); }
+  }
 }
 
-/* Custom global styles to match the Sophisticated Dark look */
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: #050505;
   color: #F5F5F7;
   font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01", "ss03", "tnum";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
 }
 
-/* Prevent iOS Safari zoom on focus by forcing font-size to 16px on inputs */
+/* Every interactive element gets a soft, consistent transition */
+button, a, input, select, textarea, [role="button"] {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform, filter;
+  transition-duration: 220ms;
+  transition-timing-function: var(--ease-apple);
+}
+
+/* Accessible focus ring, Apple style (only for keyboard) */
+:focus { outline: none; }
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #050505, 0 0 0 4px rgba(0, 255, 102, 0.6);
+  border-radius: 0.75rem;
+}
+
+/* Prevent iOS Safari zoom on focus */
 @supports (-webkit-touch-callout: none) {
-  input, select, textarea {
-    font-size: 16px !important;
+  input, select, textarea { font-size: 16px !important; }
+}
+
+::selection { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+/* ------------------------------------------------------------------ */
+/* Scrollbars                                                          */
+/* ------------------------------------------------------------------ */
+* { scrollbar-width: thin; scrollbar-color: #1C1C1E transparent; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1C1C1E; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #2C2C2E; }
+
+/* ------------------------------------------------------------------ */
+/* Utilities                                                           */
+/* ------------------------------------------------------------------ */
+@utility glass {
+  background: rgba(18, 18, 20, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@utility card-hover {
+  transition: transform 320ms var(--ease-apple), box-shadow 320ms var(--ease-apple), border-color 320ms var(--ease-apple);
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
   }
 }
 
-/* Fine-tune scrollbar layout to look premium and sleek */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+@utility skeleton {
+  background: linear-gradient(90deg, #121214 25%, #1a1a1c 50%, #121214 75%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
 }
-::-webkit-scrollbar-track {
-  background: #050505;
-}
-::-webkit-scrollbar-thumb {
-  background: #1C1C1E;
+
+@utility text-balance { text-wrap: balance; }
+
+/* Card flipping */
+.transform-style-3d { transform-style: preserve-3d; }
+.backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.rotate-y-180 { transform: rotateY(180deg); }
+
+/* Ambient aurora blobs used in the app shell */
+.aurora {
+  position: absolute;
   border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #2C2C2E;
-}
-
-/* Card flipping utilities */
-.transform-style-3d {
-  transform-style: preserve-3d;
-}
-.backface-hidden {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.rotate-y-180 {
-  transform: rotateY(180deg);
+  filter: blur(120px);
+  pointer-events: none;
+  will-change: transform;
+  animation: var(--animate-aurora);
 }
 
+/* Hide number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+/* Respect users that prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

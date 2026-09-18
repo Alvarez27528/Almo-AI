@@ -143,7 +143,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={onNavigateToScan}
-                className="flex items-center space-x-2 bg-[#1C1C1E] text-white border border-[#ffffff10] rounded-full px-5 py-2.5 text-sm hover:bg-[#2C2C2E] transition-all font-semibold"
+                className="flex items-center space-x-2 bg-[#1C1C1E] text-white border border-white/[0.08] rounded-full px-5 py-2.5 text-sm hover:bg-[#2C2C2E] transition-all font-semibold"
               >
                 <Sparkles size={16} />
                 <span>Escáner Inteligente</span>
@@ -160,8 +160,8 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
           </div>
 
           {/* Compact Transactions Card */}
-          <div className="bg-[#121214] border border-[#ffffff08] rounded-3xl overflow-hidden">
-            <div className="p-5 border-b border-[#ffffff10] flex justify-between items-center bg-[#121214]/40">
+          <div className="bg-[#0E0E10] border border-white/[0.06] rounded-[28px] overflow-hidden">
+            <div className="p-5 border-b border-white/[0.08] flex justify-between items-center bg-[#121214]/40">
               <span className="text-xs font-mono text-[#8E8E93] uppercase tracking-widest font-bold">Últimos Movimientos</span>
               <span className="text-xs font-mono text-[#8E8E93] uppercase tracking-widest font-bold">Importe</span>
             </div>
@@ -205,7 +205,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                             e.stopPropagation();
                             setSelectedTx(tx);
                           }}
-                          className="inline-flex items-center space-x-1 bg-[#00FF66]/10 hover:bg-[#00FF66]/25 border border-[#00FF66]/30 px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-wider transition-all cursor-pointer text-[#00FF66]"
+                          className="inline-flex items-center space-x-1 bg-[#00FF66]/10 hover:bg-[#00FF66]/25 border border-[#00FF66]/30 px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider transition-all cursor-pointer text-[#00FF66]"
                         >
                           <Sparkles size={10} className="text-[#00FF66] shrink-0 animate-pulse" />
                           <span>Análisis 🔍</span>
@@ -221,7 +221,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                         e.stopPropagation();
                         setSelectedTx(tx);
                       }}
-                      className="hidden sm:flex items-center space-x-1 bg-[#00FF66]/10 hover:bg-[#00FF66]/25 border border-[#00FF66]/30 px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer text-[#00FF66] hover:text-white"
+                      className="hidden sm:flex items-center space-x-1 bg-[#00FF66]/10 hover:bg-[#00FF66]/25 border border-[#00FF66]/30 px-3 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-all cursor-pointer text-[#00FF66] hover:text-white"
                     >
                       <Sparkles size={10} className="text-[#00FF66] shrink-0 animate-pulse" />
                       <span>Análisis 🔍</span>
@@ -307,7 +307,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                 placeholder="Buscar por descripción..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#050505] border border-[#ffffff10] rounded-xl pl-10 pr-4 py-2 text-base text-white placeholder-[#8E8E93] focus:outline-none focus:border-white/25"
+                className="w-full bg-[#050505] border border-white/[0.08] rounded-xl pl-10 pr-4 py-2 text-base text-white placeholder-[#8E8E93] focus:outline-none focus:border-white/25"
               />
             </div>
 
@@ -326,7 +326,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                     filterType === btn.key
                       ? 'bg-white text-black border-white font-medium shadow-sm'
-                      : 'bg-[#050505] border-[#ffffff10] text-[#8E8E93] hover:border-white/20'
+                      : 'bg-[#050505] border-white/[0.08] text-[#8E8E93] hover:border-white/20'
                   }`}
                 >
                   {btn.label}
@@ -336,8 +336,8 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
           </div>
 
           {/* Transactions List - GROW NATURALLY (NO overflow-y or max-h restrictions) */}
-          <div className="bg-[#121214] border border-[#ffffff08] rounded-3xl overflow-hidden">
-            <div className="p-5 border-b border-[#ffffff10] flex justify-between items-center bg-[#121214]/40">
+          <div className="bg-[#0E0E10] border border-white/[0.06] rounded-[28px] overflow-hidden">
+            <div className="p-5 border-b border-white/[0.08] flex justify-between items-center bg-[#121214]/40">
               <span className="text-xs font-mono text-[#8E8E93] uppercase tracking-widest font-bold">Listado completo ({filteredTransactions.length})</span>
               <span className="text-xs font-mono text-[#8E8E93] uppercase tracking-widest font-bold">Importe</span>
             </div>
@@ -391,7 +391,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                             e.stopPropagation();
                             setSelectedTx(tx);
                           }}
-                          className="inline-flex items-center space-x-1 bg-[#00FF66]/10 hover:bg-[#00FF66]/25 border border-[#00FF66]/30 px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-wider transition-all cursor-pointer text-[#00FF66]"
+                          className="inline-flex items-center space-x-1 bg-[#00FF66]/10 hover:bg-[#00FF66]/25 border border-[#00FF66]/30 px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider transition-all cursor-pointer text-[#00FF66]"
                         >
                           <Sparkles size={10} className="text-[#00FF66] shrink-0 animate-pulse" />
                           <span>Análisis 🔍</span>
@@ -407,7 +407,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                         e.stopPropagation();
                         setSelectedTx(tx);
                       }}
-                      className="hidden sm:flex items-center space-x-1 bg-[#00FF66]/10 hover:bg-[#00FF66]/25 border border-[#00FF66]/30 px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer text-[#00FF66] hover:text-white"
+                      className="hidden sm:flex items-center space-x-1 bg-[#00FF66]/10 hover:bg-[#00FF66]/25 border border-[#00FF66]/30 px-3 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-all cursor-pointer text-[#00FF66] hover:text-white"
                     >
                       <Sparkles size={10} className="text-[#00FF66] shrink-0 animate-pulse" />
                       <span>Análisis 🔍</span>
@@ -449,7 +449,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg bg-[#121214] border border-[#ffffff08] rounded-3xl p-6 shadow-2xl space-y-6 relative"
+            className="w-full max-w-lg bg-[#0E0E10] border border-white/[0.06] rounded-[28px] p-6 shadow-2xl space-y-6 relative"
           >
             <button 
               onClick={() => setShowAddModal(false)}
@@ -471,7 +471,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                   <select
                     value={type}
                     onChange={(e) => handleTypeChange(e.target.value as TransactionType)}
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
                   >
                     <option value="expense">Gasto</option>
                     <option value="income">Ingreso</option>
@@ -490,7 +490,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
                   />
                 </div>
               </div>
@@ -501,7 +501,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
                   >
                     {categoriesMap[type].map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -516,7 +516,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                     required
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
                   />
                 </div>
               </div>
@@ -529,7 +529,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                   placeholder="Ej. Mercadona Supermercados"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-[#050505] border border-[#ffffff10] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
+                  className="w-full bg-[#050505] border border-white/[0.08] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
                 />
               </div>
 
@@ -541,7 +541,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                     value={paymentMethod}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                     placeholder="Ej. Tarjeta Apple Pay"
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
                   />
                 </div>
 
@@ -552,7 +552,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="Ej. Madrid, España"
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20"
                   />
                 </div>
               </div>
@@ -564,7 +564,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Detalles específicos..."
                   rows={2}
-                  className="w-full bg-[#050505] border border-[#ffffff10] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20 resize-none"
+                  className="w-full bg-[#050505] border border-white/[0.08] rounded-xl px-3 py-2 text-base text-[#F5F5F7] focus:outline-none focus:border-white/20 resize-none"
                 />
               </div>
 
@@ -635,28 +635,28 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
 
                 {/* Header: Visual Overview */}
                 <div className="text-center space-y-2 pb-4 border-b border-[#ffffff05] shrink-0 pr-6">
-                  <div className="inline-flex items-center space-x-1.5 bg-[#00FF66]/10 text-[#00FF66] border border-[#00FF66]/20 px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-widest animate-pulse">
+                  <div className="inline-flex items-center space-x-1.5 bg-[#00FF66]/10 text-[#00FF66] border border-[#00FF66]/20 px-3 py-1 rounded-full text-[9px] font-semibold uppercase tracking-widest animate-pulse">
                     <Sparkles size={10} />
                     <span>Análisis de Movimiento</span>
                   </div>
                   
                   <div>
-                    <h2 className="text-lg sm:text-2xl font-black tracking-tight text-white leading-tight px-2 break-words">{selectedTx.description}</h2>
+                    <h2 className="text-lg sm:text-2xl font-semibold tracking-tight text-white leading-tight px-2 break-words">{selectedTx.description}</h2>
                     <p className="text-[9px] sm:text-[10px] text-slate-500 font-mono mt-0.5">ID Único: {selectedTx.id}</p>
                   </div>
 
                   {/* Gigantic visual Amount */}
                   <div className="py-1">
-                    <span className={`text-2xl sm:text-4xl md:text-5xl font-black font-mono tracking-tight break-all block px-4 leading-none ${
+                    <span className={`text-2xl sm:text-4xl md:text-5xl font-semibold font-mono tracking-tight break-all block px-4 leading-none ${
                       isExpense ? 'text-red-400' : isIncome ? 'text-emerald-400' : isInvestment ? 'text-blue-400' : 'text-purple-400'
                     }`}>
                       {isExpense ? '-' : isIncome ? '+' : ''}{formatCurrency(selectedTx.amount, profile.currency)}
                     </span>
                     <div className="flex justify-center gap-1.5 mt-2 flex-wrap">
-                      <span className={`text-[9px] font-mono uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full border ${getTxTypeBadgeColor(selectedTx.type)}`}>
+                      <span className={`text-[9px] font-mono uppercase tracking-wider font-semibold px-2.5 py-0.5 rounded-full border ${getTxTypeBadgeColor(selectedTx.type)}`}>
                         {selectedTx.type === 'expense' ? 'Gasto 🔻' : selectedTx.type === 'income' ? 'Ingreso 🔺' : selectedTx.type === 'investment' ? 'Inversión 💎' : 'Préstamo/Deuda 🤝'}
                       </span>
-                      <span className="text-[9px] font-mono uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-300">
+                      <span className="text-[9px] font-mono uppercase tracking-wider font-semibold px-2.5 py-0.5 rounded-full bg-[#0E0E10] border border-white/[0.06] text-slate-300">
                         📁 {selectedTx.category}
                       </span>
                     </div>
@@ -668,7 +668,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                   
                   {/* Dashboard of global finances to put it in context */}
                   <div className="bg-slate-950/60 rounded-xl sm:rounded-2xl border border-[#ffffff05] p-3 sm:p-4 shrink-0">
-                    <h3 className="text-[9px] sm:text-[10px] font-mono text-slate-500 uppercase tracking-widest font-extrabold mb-2.5 text-center">Tus Finanzas (Perspectiva Global)</h3>
+                    <h3 className="text-[9px] sm:text-[10px] font-mono text-slate-500 uppercase tracking-widest font-semibold mb-2.5 text-center">Tus Finanzas (Perspectiva Global)</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
                       <div className="bg-[#121214] p-2.5 sm:p-3 rounded-xl border border-[#ffffff03] flex sm:flex-col justify-between sm:justify-center items-center gap-1">
                         <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-wider">Total Ganado</span>
@@ -689,7 +689,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
 
                   {/* Gauge metrics: En qué te lo has gastado */}
                   <div className="bg-[#121214] border border-[#ffffff05] p-4 sm:p-5 rounded-2xl space-y-3.5 shrink-0">
-                    <span className="text-[9px] sm:text-[10px] font-mono text-slate-400 uppercase tracking-widest font-extrabold flex items-center gap-1.5">
+                    <span className="text-[9px] sm:text-[10px] font-mono text-slate-400 uppercase tracking-widest font-semibold flex items-center gap-1.5">
                       <Percent size={12} className="text-[#00FF66]" />
                       Distribución Porcentual del Movimiento
                     </span>
@@ -731,7 +731,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
 
                   {/* POINTS AREA: Sorted point by point analysis */}
                   <div className="space-y-3">
-                    <h3 className="text-[9px] sm:text-[10px] font-mono text-slate-500 uppercase tracking-widest font-extrabold border-b border-[#ffffff03] pb-1">
+                    <h3 className="text-[9px] sm:text-[10px] font-mono text-slate-500 uppercase tracking-widest font-semibold border-b border-[#ffffff03] pb-1">
                       Análisis Estructurado por Puntos
                     </h3>
                     
@@ -739,11 +739,11 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                       
                       {/* Punto 1: Concepto y Tipo */}
                       <div className="flex items-start space-x-2.5 bg-[#121214] p-3 rounded-xl sm:rounded-2xl border border-[#ffffff03] hover:border-[#ffffff08] transition-all">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-slate-900 border border-slate-800 text-[#00FF66] shrink-0 mt-0.5 font-bold text-[10px] sm:text-xs font-mono flex items-center justify-center">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-[#0E0E10] border border-white/[0.06] text-[#00FF66] shrink-0 mt-0.5 font-bold text-[10px] sm:text-xs font-mono flex items-center justify-center">
                           1
                         </div>
                         <div className="space-y-0.5 flex-1 min-w-0">
-                          <span className="text-[8px] sm:text-[9px] font-mono text-[#00FF66] uppercase tracking-widest font-extrabold block">Punto 1: Detalle del Concepto e Importe</span>
+                          <span className="text-[8px] sm:text-[9px] font-mono text-[#00FF66] uppercase tracking-widest font-semibold block">Punto 1: Detalle del Concepto e Importe</span>
                           <p className="text-[11px] sm:text-xs text-slate-300 font-sans leading-relaxed">
                             Has registrado un importe de <strong className="text-white font-mono">{formatCurrency(selectedTx.amount, profile.currency)}</strong> para el concepto de <strong className="text-white font-bold">"{selectedTx.description}"</strong>. Es de naturaleza <strong className="text-white">{isExpense ? 'gasto directo' : isIncome ? 'ingreso salarial/extra' : 'movimiento financiero'}</strong>, clasificado dentro de la categoría <strong className="text-[#00FF66]">{selectedTx.category}</strong>.
                           </p>
@@ -752,11 +752,11 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
 
                       {/* Punto 2: Contexto de Pago y Notas */}
                       <div className="flex items-start space-x-2.5 bg-[#121214] p-3 rounded-xl sm:rounded-2xl border border-[#ffffff03] hover:border-[#ffffff08] transition-all">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-slate-900 border border-slate-800 text-sky-400 shrink-0 mt-0.5 font-bold text-[10px] sm:text-xs font-mono flex items-center justify-center">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-[#0E0E10] border border-white/[0.06] text-sky-400 shrink-0 mt-0.5 font-bold text-[10px] sm:text-xs font-mono flex items-center justify-center">
                           2
                         </div>
                         <div className="space-y-0.5 flex-1 min-w-0">
-                          <span className="text-[8px] sm:text-[9px] font-mono text-sky-400 uppercase tracking-widest font-extrabold block">Punto 2: Canal de Pago y Metadatos</span>
+                          <span className="text-[8px] sm:text-[9px] font-mono text-sky-400 uppercase tracking-widest font-semibold block">Punto 2: Canal de Pago y Metadatos</span>
                           <p className="text-[11px] sm:text-xs text-slate-300 font-sans leading-relaxed">
                             La transacción fue procesada usando el método de pago <strong className="text-white">{selectedTx.paymentMethod}</strong>. {selectedTx.location ? `Se localizó en: ${selectedTx.location}.` : 'No incluye localización GPS específica.'} {selectedTx.notes ? `Notas añadidas: "${selectedTx.notes}"` : 'No se agregaron notas o especificaciones adicionales.'}
                           </p>
@@ -765,11 +765,11 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
 
                       {/* Punto 3: Temporalidad y Hábitos */}
                       <div className="flex items-start space-x-2.5 bg-[#121214] p-3 rounded-xl sm:rounded-2xl border border-[#ffffff03] hover:border-[#ffffff08] transition-all">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-slate-900 border border-slate-800 text-blue-400 shrink-0 mt-0.5 font-bold text-[10px] sm:text-xs font-mono flex items-center justify-center">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-[#0E0E10] border border-white/[0.06] text-blue-400 shrink-0 mt-0.5 font-bold text-[10px] sm:text-xs font-mono flex items-center justify-center">
                           3
                         </div>
                         <div className="space-y-0.5 flex-1 min-w-0">
-                          <span className="text-[8px] sm:text-[9px] font-mono text-blue-400 uppercase tracking-widest font-extrabold block">Punto 3: Impacto Temporal y Día de Registro</span>
+                          <span className="text-[8px] sm:text-[9px] font-mono text-blue-400 uppercase tracking-widest font-semibold block">Punto 3: Impacto Temporal y Día de Registro</span>
                           <p className="text-[11px] sm:text-xs text-slate-300 font-sans leading-relaxed">
                             Sucedió un <strong className="text-white">{weekdayName}</strong>, el día de fecha <strong className="text-white font-mono">{selectedTx.date}</strong>. {isWeekend 
                               ? '⚠️ Al ser Fin de Semana, aumenta la probabilidad de que este sea un gasto recreativo. Vigila los gastos hormiga que suelen duplicarse los sábados y domingos.' 
@@ -780,11 +780,11 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
 
                       {/* Punto 4: Desviación de Medias */}
                       <div className="flex items-start space-x-2.5 bg-[#121214] p-3 rounded-xl sm:rounded-2xl border border-[#ffffff03] hover:border-[#ffffff08] transition-all">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-slate-900 border border-slate-800 text-purple-400 shrink-0 mt-0.5 font-bold text-[10px] sm:text-xs font-mono flex items-center justify-center">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-[#0E0E10] border border-white/[0.06] text-purple-400 shrink-0 mt-0.5 font-bold text-[10px] sm:text-xs font-mono flex items-center justify-center">
                           4
                         </div>
                         <div className="space-y-0.5 flex-1 min-w-0">
-                          <span className="text-[8px] sm:text-[9px] font-mono text-purple-400 uppercase tracking-widest font-extrabold block">Punto 4: Desviación y Análisis de Salud</span>
+                          <span className="text-[8px] sm:text-[9px] font-mono text-purple-400 uppercase tracking-widest font-semibold block">Punto 4: Desviación y Análisis de Salud</span>
                           <p className="text-[11px] sm:text-xs text-slate-300 font-sans leading-relaxed">
                             Este movimiento es de <strong className="text-white font-mono">{formatCurrency(selectedTx.amount, profile.currency)}</strong>, lo que equivale al <strong className="text-white">{pctOfAverage}%</strong> del promedio de tus {isExpense ? 'gastos' : 'ingresos'} ({formatCurrency(avgTypeAmount, profile.currency)}). {selectedTx.amount > avgTypeAmount 
                               ? '⚠️ Este movimiento supera notablemente tu media habitual. Te recomendamos evaluar si es un gasto recurrente o un evento único de fuerza mayor.' 
@@ -795,11 +795,11 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
 
                       {/* Punto 5: XP y Recompensas */}
                       <div className="flex items-start space-x-2.5 bg-[#121214] p-3 rounded-xl sm:rounded-2xl border border-[#ffffff03] hover:border-[#ffffff08] transition-all">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-slate-900 border border-slate-800 text-amber-400 shrink-0 mt-0.5 font-bold text-[10px] sm:text-xs font-mono flex items-center justify-center animate-bounce">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-[#0E0E10] border border-white/[0.06] text-amber-400 shrink-0 mt-0.5 font-bold text-[10px] sm:text-xs font-mono flex items-center justify-center animate-bounce">
                           5
                         </div>
                         <div className="space-y-0.5 flex-1 min-w-0">
-                          <span className="text-[8px] sm:text-[9px] font-mono text-amber-400 uppercase tracking-widest font-extrabold block">Punto 5: Recompensa de Registro (+150 XP)</span>
+                          <span className="text-[8px] sm:text-[9px] font-mono text-amber-400 uppercase tracking-widest font-semibold block">Punto 5: Recompensa de Registro (+150 XP)</span>
                           <p className="text-[11px] sm:text-xs text-slate-300 font-sans leading-relaxed">
                             Mantener tus registros diarios con precisión mejora tu nivel general. Al registrar este movimiento has sumado <strong className="text-amber-400 font-bold">+150 XP</strong> para tu nivel de Inteligencia Financiera. ¡Felicidades por cultivar este gran hábito!
                           </p>
@@ -815,7 +815,7 @@ export default function Transactions({ state, onAddTransaction, onDeleteTransact
                 <div className="pt-3 border-t border-[#ffffff05] shrink-0">
                   <button
                     onClick={() => setSelectedTx(null)}
-                    className="w-full py-3.5 rounded-2xl bg-white hover:bg-slate-200 text-black font-extrabold text-xs uppercase tracking-widest transition-all cursor-pointer text-center shadow-lg"
+                    className="w-full py-3.5 rounded-2xl bg-white hover:bg-slate-200 text-black font-semibold text-xs uppercase tracking-widest transition-all cursor-pointer text-center shadow-lg"
                   >
                     Entendido, Cerrar Análisis
                   </button>

@@ -115,7 +115,7 @@ export default function VintedMode({ state, onAddTransaction, onDeleteTransactio
         <div className="lg:col-span-2 space-y-6">
           
           {/* Quick Calculator Card */}
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-5">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-5">
             <h2 className="text-md font-bold text-slate-200 flex items-center gap-2 font-mono uppercase tracking-wider">
               <Calculator size={18} className="text-pink-400" />
               Calculadora de Venta
@@ -186,7 +186,7 @@ export default function VintedMode({ state, onAddTransaction, onDeleteTransactio
               
               <div className="bg-slate-950/40 p-4 rounded-xl text-center border border-slate-800/40">
                 <span className="text-[9px] font-mono text-slate-500 uppercase block">Beneficio Neto</span>
-                <span className="text-md font-extrabold text-pink-400 font-mono">{formatCurrency(netProfit, profile.currency)}</span>
+                <span className="text-md font-semibold text-pink-400 font-mono">{formatCurrency(netProfit, profile.currency)}</span>
               </div>
 
               <div className="bg-slate-950/40 p-4 rounded-xl text-center border border-slate-800/40">
@@ -210,7 +210,7 @@ export default function VintedMode({ state, onAddTransaction, onDeleteTransactio
           </div>
 
           {/* Inventario de Ventas */}
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-4">
             <h3 className="text-sm font-bold text-slate-200 flex items-center gap-1.5 font-mono uppercase tracking-wider">
               <Package size={16} className="text-slate-400" />
               Ventas de este mes
@@ -241,7 +241,7 @@ export default function VintedMode({ state, onAddTransaction, onDeleteTransactio
               <div>
                 <span className="text-xs font-semibold text-slate-200 block">Total del Mes</span>
               </div>
-              <div className="text-lg font-black text-pink-400 font-mono">
+              <div className="text-lg font-semibold text-pink-400 font-mono">
                 {formatCurrency(vintedSales, profile.currency)}
               </div>
             </div>
@@ -252,7 +252,7 @@ export default function VintedMode({ state, onAddTransaction, onDeleteTransactio
         {/* Right column: Advice on side-gigs */}
         <div className="space-y-6">
           
-          <div className="bg-gradient-to-r from-slate-900 to-pink-950/10 border border-pink-500/20 p-6 rounded-3xl space-y-4">
+          <div className="bg-gradient-to-r from-slate-900 to-pink-950/10 border border-pink-500/20 p-6 rounded-[28px] space-y-4">
             <div className="flex items-center space-x-1.5 text-pink-400 font-mono text-xs uppercase tracking-wider">
               <Sparkles size={14} />
               <span>Optimización de Ventas IA</span>

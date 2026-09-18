@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { AppState, Budget } from '../types';
 import { FinancialStats, formatCurrency, parseLocalDate } from '../utils/finance';
 import MonthlyBudgetView from './MonthlyBudgetView';
+import AnimatedNumber from './ui/AnimatedNumber';
 import {
   Wallet,
   TrendingUp,
@@ -176,95 +177,101 @@ export default function Dashboard({
 
 
   return (
-    <div id="dashboard-container" className="space-y-10">
+    <div id="dashboard-container" className="space-y-8">
       
-      {/* Top Header Row */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#ffffff10] pb-6">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-5"
+      >
         <div>
-          <span className={`text-[10px] font-mono uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${state.premiumExpiresAt ? 'bg-amber-400/10 text-amber-400 border-amber-400/20' : 'bg-[#00FF66]/10 text-[#00FF66] border-[#00FF66]/20'}`}>
-            {state.premiumExpiresAt ? 'USUARIO PREMIUM' : 'WORKSPACE FIDUCIA'}
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex flex-wrap items-center gap-2 mt-2">
-            Hola, <span className="bg-gradient-to-r from-white via-slate-200 to-[#00FF66] bg-clip-text text-transparent">{profile.name}</span>
-            <span className="text-[10px] font-mono font-normal bg-[#00FF66]/15 text-[#00FF66] border border-[#00FF66]/25 px-2.5 py-0.5 rounded-full">
-              {profile.workType}
-            </span>
+          <p className="text-[13px] font-medium text-[#8E8E93] mb-1.5">
+            {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
+          </p>
+          <h1 className="text-[34px] sm:text-[40px] leading-[1.05] font-semibold tracking-[-0.03em] text-white">
+            Hola, {profile.name.split(' ')[0]}
           </h1>
-          <p className="text-xs sm:text-sm text-[#8E8E93] mt-1">
-            Asesoría adaptada para optimizar tu patrimonio en {profile.country}.
+          <p className="text-[14px] text-[#8E8E93] mt-2">
+            Tu patrimonio, optimizado para {profile.country}.
           </p>
         </div>
 
-        {/* Level and XP Badge with Vivid Color */}
-        <div className="flex items-center space-x-3 bg-gradient-to-br from-[#101524] to-[#0A0D16] border border-[#00FF66]/20 p-3 rounded-2xl shadow-[0_0_15px_rgba(0,255,102,0.1)] w-full sm:w-auto">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00FF66] to-[#10B981] text-black flex items-center justify-center text-xl font-bold shadow-lg shadow-[#00FF66]/25 shrink-0">
+        <div className="flex items-center gap-3 glass px-3.5 py-2.5 rounded-2xl w-full sm:w-auto">
+          <div className="w-10 h-10 rounded-[12px] bg-white text-black flex items-center justify-center text-lg font-semibold shrink-0">
             {levelInfo.icon}
           </div>
-          <div className="flex-1 min-w-[120px]">
-            <div className="flex justify-between items-center">
-              <span className={`text-xs font-mono font-bold ${levelInfo.color}`}>Nivel {state.userLevel}</span>
-              <span className="text-[9px] text-[#00FF66] font-mono">{state.userXP} XP</span>
+          <div className="flex-1 min-w-[140px]">
+            <div className="flex justify-between items-baseline">
+              <span className="text-[12px] font-semibold text-white">Nivel {state.userLevel}</span>
+              <span className="text-[10px] text-[#8E8E93] font-mono tabular-nums">{state.userXP} XP</span>
             </div>
-            <div className="w-full h-1.5 bg-slate-950 rounded-full mt-1.5 overflow-hidden border border-[#ffffff05]">
-              <div 
-                className="bg-gradient-to-r from-[#00FF66] to-[#10B981] h-full transition-all duration-500 rounded-full" 
-                style={{ width: `${(state.userXP % 100) / 1}%` }}
+            <div className="w-full h-1 bg-white/[0.08] rounded-full mt-1.5 overflow-hidden">
+              <motion.div
+                className="bg-[#00FF66] h-full rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${(state.userXP % 100) / 1}%` }}
+                transition={{ type: 'spring', stiffness: 60, damping: 18, delay: 0.2 }}
               />
             </div>
-            <span className="text-[9px] text-slate-500 font-mono block mt-0.5">{levelInfo.title}</span>
+            <span className="text-[10px] text-[#5A5A5E] block mt-1">{levelInfo.title}</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-
-
-      {/* Primary Financial State Tiles (Simplified) */}
+      {/* KPI tiles */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        
-        {/* Available Cash Tile */}
-        <div className="bg-gradient-to-br from-[#0A1A12] to-[#040C08] border border-[#00FF66]/15 p-6 rounded-3xl relative overflow-hidden shadow-lg shadow-[#00FF66]/5">
-          <div className="flex justify-between items-center text-[#00FF66] mb-3">
-            <span className="text-[10px] font-mono uppercase tracking-widest font-extrabold">Saldo Disponible</span>
-            <Wallet className="text-[#00FF66]" size={16} />
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+          className="card-hover relative overflow-hidden card-hover bg-[#0E0E10] border border-white/[0.06] p-6 sm:p-7 rounded-[28px]"
+        >
+          <div className="absolute -top-24 -right-24 w-56 h-56 bg-[#00FF66]/[0.08] blur-[70px] rounded-full pointer-events-none" />
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-[12px] font-medium text-[#8E8E93]">Saldo disponible</span>
+            <span className="w-8 h-8 rounded-full bg-[#00FF66]/10 text-[#00FF66] flex items-center justify-center"><Wallet size={15} /></span>
           </div>
-          <div className="text-3xl font-black text-white tracking-tight">
+          <div className="text-[36px] sm:text-[40px] leading-none font-semibold text-white tracking-[-0.03em]">
             <InfoTooltip text="Dinero real disponible tras sumar ahorros base y movimientos netos.">
-              {formatCurrency(stats.availableCash, profile.currency)}
+              <AnimatedNumber value={stats.availableCash} format={v => formatCurrency(v, profile.currency)} />
             </InfoTooltip>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Monthly Balance Tile */}
-        <div className="bg-gradient-to-br from-[#0A161C] to-[#040C10] border border-cyan-500/15 p-6 rounded-3xl relative overflow-hidden shadow-lg shadow-cyan-500/5">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-cyan-400/5 to-transparent pointer-events-none rounded-bl-full" />
-          <div className="flex justify-between items-center text-cyan-400 mb-3">
-            <span className="text-[10px] font-mono uppercase tracking-widest font-extrabold">Balance del Mes</span>
-            <TrendingUp className="text-cyan-400" size={16} />
-          </div>
-          <div className="text-3xl font-black text-white tracking-tight">
-            <InfoTooltip text="Ingresos totales menos gastos registrados en el mes actual.">
-              {formatCurrency(stats.totalIncome - stats.totalExpenses, profile.currency)}
-            </InfoTooltip>
-          </div>
-          <div className="mt-4 flex items-center space-x-2 text-xs">
-            <span className="text-slate-400">
-                {stats.previousMonthExpenses > 0 ? (
-                    <>
-                        {stats.totalExpenses <= stats.previousMonthExpenses ? (
-                            <span className="text-[#00FF66]">
-                                Ahorro: {Math.round(((stats.previousMonthExpenses - stats.totalExpenses) / stats.previousMonthExpenses) * 100)}% vs mes ant.
-                            </span>
-                        ) : (
-                            <span className="text-rose-400">
-                                Exceso: {Math.round(((stats.totalExpenses - stats.previousMonthExpenses) / stats.previousMonthExpenses) * 100)}% vs mes ant.
-                            </span>
-                        )}
-                    </>
-                ) : 'Sin datos mes anterior'}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          className="card-hover relative overflow-hidden card-hover bg-[#0E0E10] border border-white/[0.06] p-6 sm:p-7 rounded-[28px]"
+        >
+          <div className="absolute -top-24 -right-24 w-56 h-56 bg-cyan-400/[0.07] blur-[70px] rounded-full pointer-events-none" />
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-[12px] font-medium text-[#8E8E93]">Balance del mes</span>
+            <span className="w-8 h-8 rounded-full bg-cyan-400/10 text-cyan-400 flex items-center justify-center">
+              {stats.totalIncome - stats.totalExpenses >= 0 ? <TrendingUp size={15} /> : <TrendingDown size={15} />}
             </span>
           </div>
-        </div>
-
+          <div className="text-[36px] sm:text-[40px] leading-none font-semibold text-white tracking-[-0.03em]">
+            <InfoTooltip text="Ingresos totales menos gastos registrados en el mes actual.">
+              <AnimatedNumber value={stats.totalIncome - stats.totalExpenses} format={v => formatCurrency(v, profile.currency)} />
+            </InfoTooltip>
+          </div>
+          <div className="mt-4 text-[12px]">
+            {stats.previousMonthExpenses > 0 ? (
+              stats.totalExpenses <= stats.previousMonthExpenses ? (
+                <span className="inline-flex items-center gap-1 text-[#00FF66] bg-[#00FF66]/10 px-2 py-0.5 rounded-full font-medium">
+                  <TrendingDown size={11} /> {Math.round(((stats.previousMonthExpenses - stats.totalExpenses) / stats.previousMonthExpenses) * 100)}% menos gasto que el mes pasado
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full font-medium">
+                  <TrendingUp size={11} /> {Math.round(((stats.totalExpenses - stats.previousMonthExpenses) / stats.previousMonthExpenses) * 100)}% más gasto que el mes pasado
+                </span>
+              )
+            ) : <span className="text-[#5A5A5E]">Sin datos del mes anterior</span>}
+          </div>
+        </motion.div>
       </div>
 
       {/* Main Bento Core: 2 Column Layout (Adjusted for perfect mobile layout) */}
@@ -274,16 +281,16 @@ export default function Dashboard({
         <div className="lg:col-span-2 space-y-8">
           
           {/* AI Intelligence Board (High Tech Green Glow) */}
-          <div className="bg-gradient-to-br from-[#09151B] via-[#040810] to-[#020408] border border-cyan-500/20 p-6 sm:p-8 rounded-3xl relative overflow-hidden shadow-xl shadow-cyan-500/5">
-            <div className="absolute -top-16 -right-16 w-32 h-32 bg-cyan-400/5 blur-[50px] rounded-full pointer-events-none" />
+          <div className="card-hover card-hover bg-[#0E0E10] border border-white/[0.06] p-6 sm:p-8 rounded-[28px] relative overflow-hidden">
+            <div className="absolute -top-20 -left-20 w-48 h-48 bg-[#00FF66]/[0.06] blur-[60px] rounded-full pointer-events-none" />
             
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-2.5 h-2.5 bg-[#00FF66] rounded-full animate-ping" />
-              <span className="text-[10px] uppercase tracking-widest text-[#00FF66] font-extrabold font-mono">CONSEJO FIDUCIA AI</span>
+              <Sparkles size={14} className="text-[#00FF66]" />
+              <span className="text-[12px] font-medium text-[#8E8E93]">Consejo de ALMO AI</span>
             </div>
             
-            <h3 className="text-md sm:text-lg font-bold text-white tracking-tight mb-2">
-              Recomendación adaptada de tu Asesor Personal
+            <h3 className="text-[19px] font-semibold text-white tracking-[-0.02em] mb-3">
+              Recomendación de tu asesor personal
             </h3>
 
             <div className="text-slate-300 text-sm leading-relaxed min-h-[48px] font-sans">
@@ -297,7 +304,7 @@ export default function Dashboard({
                   <span className="text-xs text-[#00FF66] font-mono">Generando recomendación de cartera...</span>
                 </div>
               ) : (
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="italic text-slate-100 bg-slate-950/40 p-4 rounded-xl border border-[#ffffff05]">
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[#D1D1D6] text-[14px] leading-relaxed">
                   "{aiTip}"
                 </motion.p>
               )}
@@ -317,7 +324,7 @@ export default function Dashboard({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <button
               onClick={onQuickAddTransaction}
-              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[#121214] border border-[#ffffff08] text-slate-400 hover:border-[#00FF66]/20 hover:bg-[#00FF66]/5 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-center gap-2 cursor-pointer group"
+              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[#0E0E10] border border-white/[0.06] text-slate-400 hover:border-[#00FF66]/20 hover:bg-[#00FF66]/5 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-center gap-2 cursor-pointer group"
             >
               <div className="p-2.5 rounded-xl bg-slate-950 border border-[#ffffff08] text-[#00FF66] group-hover:bg-[#00FF66] group-hover:text-black transition-all shadow-md">
                 <Plus size={18} className="stroke-[2.5]" />
@@ -327,7 +334,7 @@ export default function Dashboard({
 
             <button
               onClick={() => onNavigate('scan')}
-              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[#121214] border border-[#ffffff08] text-slate-400 hover:border-[#00FF66]/20 hover:bg-[#00FF66]/5 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-center gap-2 cursor-pointer group"
+              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[#0E0E10] border border-white/[0.06] text-slate-400 hover:border-[#00FF66]/20 hover:bg-[#00FF66]/5 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-center gap-2 cursor-pointer group"
             >
               <div className="p-2.5 rounded-xl bg-slate-950 border border-[#ffffff08] text-[#00FF66] group-hover:bg-[#00FF66] group-hover:text-black transition-all shadow-md">
                 <ScanQrCode size={18} />
@@ -337,7 +344,7 @@ export default function Dashboard({
 
             <button
               onClick={() => onNavigate('simulator')}
-              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[#121214] border border-[#ffffff08] text-slate-400 hover:border-[#00FF66]/20 hover:bg-[#00FF66]/5 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-center gap-2 cursor-pointer group"
+              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[#0E0E10] border border-white/[0.06] text-slate-400 hover:border-[#00FF66]/20 hover:bg-[#00FF66]/5 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-center gap-2 cursor-pointer group"
             >
               <div className="p-2.5 rounded-xl bg-slate-950 border border-[#ffffff08] text-[#00FF66] group-hover:bg-[#00FF66] group-hover:text-black transition-all shadow-md">
                 <LineChartIcon size={18} />
@@ -347,7 +354,7 @@ export default function Dashboard({
 
             <button
               onClick={() => onNavigate('vinted')}
-              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[#121214] border border-[#ffffff08] text-slate-400 hover:border-[#00FF66]/20 hover:bg-[#00FF66]/5 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-center gap-2 cursor-pointer group"
+              className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[#0E0E10] border border-white/[0.06] text-slate-400 hover:border-[#00FF66]/20 hover:bg-[#00FF66]/5 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-center gap-2 cursor-pointer group"
             >
               <div className="p-2.5 rounded-xl bg-slate-950 border border-[#ffffff08] text-[#00FF66] group-hover:bg-[#00FF66] group-hover:text-black transition-all shadow-md">
                 <ShoppingBag size={18} />
@@ -360,7 +367,7 @@ export default function Dashboard({
           <MonthlyBudgetView state={state} onUpdateBudgets={onUpdateBudgets} />
 
           {/* Visual Financial Analytics Section (Recharts) */}
-          <div className="bg-[#121214] border border-[#ffffff08] p-6 sm:p-8 rounded-3xl space-y-8 shadow-xl">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 sm:p-8 rounded-[28px] space-y-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#ffffff05] pb-4">
               <div>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
@@ -478,7 +485,7 @@ export default function Dashboard({
                         stroke="#71717a" 
                         fontSize={10} 
                         tickLine={false}
-                        formatter={(value: number) => `${value > 0 ? '+' : ''}${value}`} 
+                        tickFormatter={(value: number) => `${value > 0 ? '+' : ''}${value}`} 
                       />
                       <Tooltip
                         contentStyle={{
@@ -527,7 +534,7 @@ export default function Dashboard({
         <div className="space-y-8">
           
           {/* Circular Health Score Card */}
-          <div className="bg-[#121214] border border-[#ffffff08] p-6 sm:p-8 rounded-3xl flex flex-col items-center text-center shadow-xl">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 sm:p-8 rounded-[28px] flex flex-col items-center text-center shadow-xl">
             <h3 className="text-[10px] font-mono text-slate-400 uppercase tracking-widest mb-4">Puntuación de Salud</h3>
             
             <div className="relative w-36 h-36 flex items-center justify-center">
@@ -557,13 +564,13 @@ export default function Dashboard({
               
               {/* Score text */}
               <div className="absolute flex flex-col items-center">
-                <span className="text-4xl font-extrabold text-white font-mono bg-gradient-to-r from-white to-[#00FF66] bg-clip-text text-transparent">{stats.financialScore}</span>
+                <span className="text-4xl font-semibold text-white font-mono bg-gradient-to-r from-white to-[#00FF66] bg-clip-text text-transparent">{stats.financialScore}</span>
                 <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider mt-0.5">de 100</span>
               </div>
             </div>
 
             <div className="mt-4">
-              <span className="text-sm font-extrabold text-white flex items-center justify-center gap-1.5">
+              <span className="text-sm font-semibold text-white flex items-center justify-center gap-1.5">
                 <Award size={14} className="text-[#00FF66]" />
                 {stats.financialScore >= 80 ? 'Excelente Salud' : stats.financialScore >= 60 ? 'Salud Estable' : 'Necesita Optimizar'}
               </span>
@@ -576,7 +583,7 @@ export default function Dashboard({
           </div>
 
           {/* Active Goals Brief */}
-          <div className="bg-[#121214] border border-[#ffffff08] p-6 sm:p-8 rounded-3xl shadow-xl">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 sm:p-8 rounded-[28px] shadow-xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Objetivos</h3>
               <button 
@@ -621,7 +628,7 @@ export default function Dashboard({
           </div>
 
           {/* Upcoming Bills brief */}
-          <div className="bg-[#121214] border border-[#ffffff08] p-6 sm:p-8 rounded-3xl shadow-xl">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 sm:p-8 rounded-[28px] shadow-xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Próximos Pagos</h3>
               <button 

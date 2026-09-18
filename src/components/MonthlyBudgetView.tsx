@@ -273,7 +273,7 @@ export default function MonthlyBudgetView({ state, onUpdateBudgets }: MonthlyBud
   };
 
   return (
-    <div id="monthly-budget-view" className="bg-[#121214] border border-[#ffffff08] p-6 sm:p-8 rounded-3xl space-y-8 shadow-xl relative overflow-hidden">
+    <div id="monthly-budget-view" className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 sm:p-8 rounded-[28px] space-y-8 shadow-xl relative overflow-hidden">
       
       {/* Background Subtle Accent Glow */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-[#00FF66]/5 blur-3xl pointer-events-none rounded-full" />
@@ -309,7 +309,7 @@ export default function MonthlyBudgetView({ state, onUpdateBudgets }: MonthlyBud
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#1A1A1E] hover:bg-[#24242A] border border-[#ffffff10] text-xs font-semibold text-white transition-all hover:scale-[1.02] active:scale-95"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#1A1A1E] hover:bg-[#24242A] border border-white/[0.08] text-xs font-semibold text-white transition-all hover:scale-[1.02] active:scale-95"
           >
             <Plus size={14} className="text-[#00FF66]" />
             <span>Añadir Límite Custom</span>
@@ -326,7 +326,7 @@ export default function MonthlyBudgetView({ state, onUpdateBudgets }: MonthlyBud
             Presupuesto Límite Total
           </span>
           <div className="flex items-baseline justify-between">
-            <span className="text-xl font-mono font-extrabold text-white">
+            <span className="text-xl font-mono font-semibold text-white">
               {formatCurrency(totalLimit, currency)}
             </span>
             <span className="text-xs text-[#8E8E93] font-mono">100%</span>
@@ -339,7 +339,7 @@ export default function MonthlyBudgetView({ state, onUpdateBudgets }: MonthlyBud
             Gastado este Mes
           </span>
           <div className="flex items-baseline justify-between">
-            <span className={`text-xl font-mono font-extrabold ${
+            <span className={`text-xl font-mono font-semibold ${
               overallPercentage > 95 ? 'text-rose-400' : overallPercentage > 75 ? 'text-amber-400' : 'text-[#00FF66]'
             }`}>
               {formatCurrency(totalSpent, currency)}
@@ -358,7 +358,7 @@ export default function MonthlyBudgetView({ state, onUpdateBudgets }: MonthlyBud
             {totalRemaining >= 0 ? 'Margen Disponible' : 'Exceso sobre Límite'}
           </span>
           <div className="flex items-baseline justify-between">
-            <span className={`text-xl font-mono font-extrabold ${totalRemaining >= 0 ? 'text-white' : 'text-rose-400'}`}>
+            <span className={`text-xl font-mono font-semibold ${totalRemaining >= 0 ? 'text-white' : 'text-rose-400'}`}>
               {formatCurrency(Math.abs(totalRemaining), currency)}
             </span>
             <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
@@ -514,7 +514,7 @@ export default function MonthlyBudgetView({ state, onUpdateBudgets }: MonthlyBud
               {!isEditingThis ? (
                 <div className="flex items-baseline justify-between text-xs my-2">
                   <span className="text-slate-300 font-mono">
-                    <strong className="text-white font-extrabold">{formatCurrency(item.spentAmount, currency)}</strong> gastados
+                    <strong className="text-white font-semibold">{formatCurrency(item.spentAmount, currency)}</strong> gastados
                   </span>
                   <span className="text-[#8E8E93] font-mono text-[11px]">
                     Límite: <strong className="text-slate-200">{formatCurrency(item.limitAmount, currency)}</strong>
@@ -527,7 +527,7 @@ export default function MonthlyBudgetView({ state, onUpdateBudgets }: MonthlyBud
                     type="number"
                     value={tempLimit}
                     onChange={(e) => setTempLimit(parseFloat(e.target.value) || 0)}
-                    className="w-24 bg-[#18181B] border border-[#ffffff10] px-2 py-1 rounded-lg text-xs font-mono text-white focus:outline-none focus:border-[#00FF66]"
+                    className="w-24 bg-[#18181B] border border-white/[0.08] px-2 py-1 rounded-lg text-xs font-mono text-white focus:outline-none focus:border-[#00FF66]"
                     autoFocus
                   />
                   <button
@@ -581,9 +581,9 @@ export default function MonthlyBudgetView({ state, onUpdateBudgets }: MonthlyBud
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md bg-[#18181B] border border-[#ffffff15] p-6 rounded-3xl space-y-6 shadow-2xl relative"
+              className="w-full max-w-md bg-[#18181B] border border-[#ffffff15] p-6 rounded-[28px] space-y-6 shadow-2xl relative"
             >
-              <div className="flex justify-between items-center border-b border-[#ffffff10] pb-3">
+              <div className="flex justify-between items-center border-b border-white/[0.08] pb-3">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <Plus size={18} className="text-[#00FF66]" />
                   Crear Nuevo Límite de Categoría
@@ -607,7 +607,7 @@ export default function MonthlyBudgetView({ state, onUpdateBudgets }: MonthlyBud
                     value={newCatName}
                     onChange={(e) => setNewCatName(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#121214] border border-[#ffffff10] text-sm text-white focus:outline-none focus:border-[#00FF66]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#121214] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-[#00FF66]"
                   />
                 </div>
 
@@ -623,7 +623,7 @@ export default function MonthlyBudgetView({ state, onUpdateBudgets }: MonthlyBud
                     required
                     min="1"
                     step="any"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#121214] border border-[#ffffff10] text-sm text-white font-mono focus:outline-none focus:border-[#00FF66]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#121214] border border-white/[0.08] text-sm text-white font-mono focus:outline-none focus:border-[#00FF66]"
                   />
                 </div>
 

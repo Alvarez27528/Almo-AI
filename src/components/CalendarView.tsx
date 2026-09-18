@@ -94,7 +94,7 @@ export default function CalendarView({ state, onPayEvent, onAddEvent }: Calendar
         {/* Left column (2 cols span): Events Agenda */}
         <div className="lg:col-span-2 space-y-4">
           
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+          <div className="bg-[#0E0E10] border border-white/[0.06] rounded-[28px] overflow-hidden">
             <div className="p-5 border-b border-slate-850 flex justify-between items-center bg-slate-900/40">
               <span className="text-xs font-mono text-slate-500 uppercase tracking-widest">Agenda de Vencimientos</span>
               <span className="text-xs font-mono text-slate-500 uppercase tracking-widest">Importe / Estado</span>
@@ -156,7 +156,7 @@ export default function CalendarView({ state, onPayEvent, onAddEvent }: Calendar
         {/* Right column: Notification hub info & alert caps */}
         <div className="space-y-6">
           
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-4">
             <h3 className="text-sm font-bold text-slate-200 flex items-center gap-1.5 font-mono uppercase tracking-wider">
               <BellRing size={16} className="text-red-400" />
               Notificaciones de Cobro
@@ -180,7 +180,7 @@ export default function CalendarView({ state, onPayEvent, onAddEvent }: Calendar
           </div>
 
           {/* AI advice box on subscriptions */}
-          <div className="bg-gradient-to-r from-slate-900 to-emerald-950/10 border border-emerald-500/20 p-5 rounded-3xl space-y-3">
+          <div className="bg-gradient-to-r from-slate-900 to-emerald-950/10 border border-emerald-500/20 p-5 rounded-[28px] space-y-3">
             <div className="flex items-center space-x-1.5 text-emerald-400 font-mono text-xs uppercase tracking-wider">
               <Sparkles size={14} />
               <span>Optimización de Suscripciones</span>
@@ -200,7 +200,7 @@ export default function CalendarView({ state, onPayEvent, onAddEvent }: Calendar
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6 relative"
+            className="w-full max-w-lg bg-[#0E0E10] border border-white/[0.06] rounded-[28px] p-6 shadow-2xl space-y-6 relative"
           >
             <button 
               onClick={() => setShowAddModal(false)}
@@ -270,7 +270,7 @@ export default function CalendarView({ state, onPayEvent, onAddEvent }: Calendar
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:opacity-90 font-bold text-slate-950 text-xs transition-all shadow-md mt-4"
+                className="w-full py-3.5 rounded-xl bg-white hover:bg-[#E5E5EA] font-semibold text-black text-xs transition-all shadow-md mt-4"
               >
                 Programar en Agenda
               </button>

@@ -151,7 +151,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         currency,
         profession: profession.trim() || 'Profesional',
         company: company.trim() || undefined,
-        workType: workType === 'Otro' ? (otherWorkType as any) : workType,
+        workType: (workType as string) === 'Otro' ? (otherWorkType as any) : workType,
         incomeFixed: Number(incomeFixed) || 0,
         incomeVariable: Number(incomeVariable) || 0,
         incomeBusiness: Number(incomeBusiness) || 0,
@@ -213,7 +213,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-2xl bg-[#121214] border border-[#ffffff08] rounded-3xl p-8 shadow-2xl relative"
+        className="w-full max-w-2xl bg-[#0E0E10] border border-white/[0.06] rounded-[28px] p-8 shadow-2xl relative"
       >
         {/* Upper Brand Badge */}
         <div className="flex items-center space-x-3 mb-6">
@@ -249,7 +249,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   placeholder="Ej. Alejandro Gómez"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl px-4 py-3.5 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
+                  className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl px-4 py-3.5 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
                 />
               </div>
 
@@ -262,7 +262,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     max="100"
                     value={age}
                     onChange={(e) => setAge(Number(e.target.value))}
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-mono text-sm"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-mono text-sm"
                   />
                 </div>
                 <div>
@@ -271,7 +271,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     type="text"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
                   />
                 </div>
               </div>
@@ -291,7 +291,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                       className={`py-3.5 rounded-2xl border text-xs font-semibold transition-all cursor-pointer ${
                         currency === cur.key
                           ? 'bg-[#00FF66]/10 border-[#00FF66] text-[#00FF66] font-bold'
-                          : 'bg-[#050505] border-[#ffffff10] text-[#8E8E93] hover:border-white/20'
+                          : 'bg-[#050505] border-white/[0.08] text-[#8E8E93] hover:border-white/20'
                       }`}
                     >
                       {cur.label}
@@ -303,7 +303,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     className={`py-3.5 rounded-2xl border text-xs font-semibold transition-all cursor-pointer ${
                       !['€', '$', '£'].includes(currency)
                         ? 'bg-[#00FF66]/10 border-[#00FF66] text-[#00FF66] font-bold'
-                        : 'bg-[#050505] border-[#ffffff10] text-[#8E8E93] hover:border-white/20'
+                        : 'bg-[#050505] border-white/[0.08] text-[#8E8E93] hover:border-white/20'
                     }`}
                   >
                     {!['€', '$', '£'].includes(currency) ? `${currency} (${currency})` : 'Más...'}
@@ -343,7 +343,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     className={`p-3 rounded-2xl border text-xs font-semibold transition-all cursor-pointer text-center flex items-center justify-center ${
                       workType === item.key
                         ? 'bg-[#00FF66]/10 border-[#00FF66] text-[#00FF66] font-bold'
-                        : 'bg-[#050505] border-[#ffffff10] text-[#8E8E93] hover:border-white/20'
+                        : 'bg-[#050505] border-white/[0.08] text-[#8E8E93] hover:border-white/20'
                     }`}
                   >
                     {item.label}
@@ -352,7 +352,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               </div>
 
               <div className="space-y-4">
-                {workType === 'Otro' && (
+                {(workType as string) === 'Otro' && (
                   <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
                     <label className="block text-[10px] font-mono text-[#8E8E93] uppercase tracking-widest mb-2">Especifica tu tipo de ocupación</label>
                     <input
@@ -360,7 +360,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                       placeholder="Ej. Inversor, Jubilado, Freelance, etc."
                       value={otherWorkType}
                       onChange={(e) => setOtherWorkType(e.target.value)}
-                      className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl px-4 py-3.5 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
+                      className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl px-4 py-3.5 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
                     />
                   </motion.div>
                 )}
@@ -372,7 +372,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     placeholder="Ej. Camarero, Ingeniero, Estudiante de Derecho, Diseñador"
                     value={profession}
                     onChange={(e) => setProfession(e.target.value)}
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl px-4 py-3.5 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl px-4 py-3.5 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
                   />
                 </div>
 
@@ -383,7 +383,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     placeholder="Ej. Particular, Hospital Central, ByteCraft"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl px-4 py-3.5 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl px-4 py-3.5 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
                   />
                 </div>
 
@@ -395,7 +395,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                       placeholder="Ej. Venta de ropa online, Cafetería, Consultoría de diseño"
                       value={businessSector}
                       onChange={(e) => setBusinessSector(e.target.value)}
-                      className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl px-4 py-3.5 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
+                      className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl px-4 py-3.5 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-sans text-sm"
                     />
                   </motion.div>
                 )}
@@ -425,7 +425,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     type="number"
                     value={incomeFixed}
                     onChange={(e) => setIncomeFixed(Number(e.target.value))}
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl pl-10 pr-4 py-3.5 text-white focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-mono text-sm"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl pl-10 pr-4 py-3.5 text-white focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-mono text-sm"
                   />
                 </div>
                 <p className="text-[10px] text-[#8E8E93] mt-2 italic">Se sumará solo cada día 1 de mes.</p>
@@ -439,7 +439,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     type="number"
                     value={incomeVariable}
                     onChange={(e) => setIncomeVariable(Number(e.target.value))}
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl pl-10 pr-4 py-3.5 text-white focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-mono text-sm"
+                    className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl pl-10 pr-4 py-3.5 text-white focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/10 transition-all font-mono text-sm"
                   />
                 </div>
                 <p className="text-[10px] text-[#8E8E93] mt-2 italic">Alquileres, ayudas o pensiones.</p>
@@ -477,7 +477,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                         type="number"
                         value={item.value}
                         onChange={(e) => item.set(Number(e.target.value))}
-                        className="w-full bg-[#050505] border border-[#ffffff10] rounded-xl pl-8 pr-3 py-2.5 text-white focus:outline-none focus:border-[#00FF66]/50 transition-all font-mono text-base"
+                        className="w-full bg-[#050505] border border-white/[0.08] rounded-xl pl-8 pr-3 py-2.5 text-white focus:outline-none focus:border-[#00FF66]/50 transition-all font-mono text-base"
                       />
                     </div>
                   </div>
@@ -509,7 +509,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                       type="number"
                       value={currentSavings}
                       onChange={(e) => setCurrentSavings(Number(e.target.value))}
-                      className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl pl-9 pr-4 py-3.5 text-white focus:outline-none focus:border-[#00FF66]/50 transition-all font-mono text-sm text-center"
+                      className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl pl-9 pr-4 py-3.5 text-white focus:outline-none focus:border-[#00FF66]/50 transition-all font-mono text-sm text-center"
                     />
                   </div>
                 </div>
@@ -530,7 +530,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                       className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                         riskLevel === lvl.key
                           ? 'bg-[#00FF66]/10 border-[#00FF66] text-white shadow-md shadow-[#00FF66]/5'
-                          : 'bg-[#050505] border-[#ffffff10] text-[#8E8E93] hover:border-white/20'
+                          : 'bg-[#050505] border-white/[0.08] text-[#8E8E93] hover:border-white/20'
                       }`}
                     >
                       <div className={`text-xs font-bold ${riskLevel === lvl.key ? 'text-[#00FF66]' : 'text-slate-300'}`}>{lvl.label}</div>
@@ -566,7 +566,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                     className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                       isSelected
                         ? 'bg-[#00FF66]/10 border-[#00FF66] text-white font-bold'
-                        : 'bg-[#050505] border-[#ffffff10] text-[#8E8E93] hover:border-white/20'
+                        : 'bg-[#050505] border-white/[0.08] text-[#8E8E93] hover:border-white/20'
                     }`}
                   >
                     <span className="text-xs font-medium">{friendlyGoalLabels[goal] || goal}</span>
@@ -585,7 +585,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           <button
             type="button"
             onClick={handleBack}
-            className={`px-5 py-3 rounded-xl text-xs font-semibold border border-[#ffffff10] text-[#8E8E93] hover:text-white hover:border-white/20 transition-all cursor-pointer ${
+            className={`px-5 py-3 rounded-xl text-xs font-semibold border border-white/[0.08] text-[#8E8E93] hover:text-white hover:border-white/20 transition-all cursor-pointer ${
               step === 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'
             }`}
           >
@@ -595,7 +595,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           <button
             type="button"
             onClick={handleNext}
-            className="flex items-center space-x-2 px-6 py-3.5 rounded-2xl text-xs font-bold bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer shadow-[0_4px_15px_rgba(0,255,102,0.15)]"
+            className="flex items-center space-x-2 px-6 py-3.5 rounded-2xl text-xs font-bold bg-white text-black hover:bg-[#E5E5EA] hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer shadow-[0_4px_15px_rgba(0,255,102,0.15)]"
           >
             <span>{step === 6 ? '¡Comenzar ya!' : 'Siguiente'}</span>
             <ArrowRight size={14} className="stroke-[2.5]" />
@@ -615,7 +615,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="w-full max-w-lg bg-[#121214] border border-[#ffffff10] rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[80vh]"
+                className="w-full max-w-lg bg-[#121214] border border-white/[0.08] rounded-[28px] overflow-hidden shadow-2xl flex flex-col max-h-[80vh]"
               >
                 <div className="p-6 border-b border-[#ffffff08] flex justify-between items-center">
                   <div>
@@ -638,7 +638,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                       placeholder="Buscar por nombre o código (Ej: USD, Peso...)"
                       value={currencySearch}
                       onChange={(e) => setCurrencySearch(e.target.value)}
-                      className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl pl-10 pr-4 py-3 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/30 transition-all text-sm"
+                      className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl pl-10 pr-4 py-3 text-white placeholder-[#8E8E93] focus:outline-none focus:border-[#00FF66]/30 transition-all text-sm"
                       autoFocus
                     />
                   </div>

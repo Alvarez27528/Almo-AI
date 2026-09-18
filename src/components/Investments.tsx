@@ -111,9 +111,9 @@ export default function Investments({ state, onAddAsset, onDeleteAsset }: Invest
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* Total portfolio size */}
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl relative overflow-hidden">
+        <div className="bg-[#0E0E10] border border-white/[0.06] p-5 rounded-2xl relative overflow-hidden">
           <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block mb-1">Valor Total Cartera</span>
-          <div className="text-3xl font-extrabold text-white tracking-tight font-mono">
+          <div className="text-3xl font-semibold text-white tracking-tight font-mono">
             {formatCurrency(totalCurrentValue, profile.currency)}
           </div>
           <span className="text-[10px] text-slate-500 block mt-2 font-sans">
@@ -122,9 +122,9 @@ export default function Investments({ state, onAddAsset, onDeleteAsset }: Invest
         </div>
 
         {/* Investment ROI */}
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl relative overflow-hidden">
+        <div className="bg-[#0E0E10] border border-white/[0.06] p-5 rounded-2xl relative overflow-hidden">
           <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block mb-1">Rendimiento Histórico</span>
-          <div className={`text-3xl font-extrabold tracking-tight font-mono flex items-center gap-2 ${
+          <div className={`text-3xl font-semibold tracking-tight font-mono flex items-center gap-2 ${
             overallReturn >= 0 ? 'text-emerald-400' : 'text-red-400'
           }`}>
             {overallReturn >= 0 ? '+' : '-'}
@@ -140,7 +140,7 @@ export default function Investments({ state, onAddAsset, onDeleteAsset }: Invest
         </div>
 
         {/* Assets weighting info */}
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl relative overflow-hidden">
+        <div className="bg-[#0E0E10] border border-white/[0.06] p-5 rounded-2xl relative overflow-hidden">
           <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block mb-1">Distribución Táctica</span>
           <div className="flex items-center space-x-3 mt-1">
             <PieChart className="text-purple-400 shrink-0" size={32} />
@@ -160,7 +160,7 @@ export default function Investments({ state, onAddAsset, onDeleteAsset }: Invest
       </div>
 
       {/* Asset Holdings Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+      <div className="bg-[#0E0E10] border border-white/[0.06] rounded-[28px] overflow-hidden">
         <div className="p-5 border-b border-slate-850 flex justify-between items-center bg-slate-900/40">
           <span className="text-xs font-mono text-slate-500 uppercase tracking-widest">Activo</span>
           <div className="flex space-x-12 sm:space-x-24 text-xs font-mono text-slate-500 uppercase tracking-widest">
@@ -210,7 +210,7 @@ export default function Investments({ state, onAddAsset, onDeleteAsset }: Invest
                   </div>
 
                   {/* Current val */}
-                  <div className="w-24 font-extrabold text-slate-200">
+                  <div className="w-24 font-semibold text-slate-200">
                     {formatCurrency(asset.currentValue, profile.currency)}
                   </div>
 
@@ -234,7 +234,7 @@ export default function Investments({ state, onAddAsset, onDeleteAsset }: Invest
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6 relative"
+            className="w-full max-w-lg bg-[#0E0E10] border border-white/[0.06] rounded-[28px] p-6 shadow-2xl space-y-6 relative"
           >
             <button 
               onClick={() => setShowAddModal(false)}
@@ -334,7 +334,7 @@ export default function Investments({ state, onAddAsset, onDeleteAsset }: Invest
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:opacity-90 font-bold text-slate-950 text-xs transition-all shadow-md mt-4"
+                className="w-full py-3.5 rounded-xl bg-white hover:bg-[#E5E5EA] font-semibold text-black text-xs transition-all shadow-md mt-4"
               >
                 Guardar e Integrar en Cartera
               </button>

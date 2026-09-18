@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { AppState, UserProfile, WorkType, RiskLevel } from '../types';
 import TermsModal from './TermsModal';
 import { auth } from '../firebase';
+import { hashPin } from '../utils/pin';
 import { 
   Settings as SettingsIcon, 
   User, 
@@ -53,13 +54,21 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [confirmInput, setConfirmInput] = useState('');
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (protectedTabs.length > 0 && pinMode === 'create' && securityPin.length !== 4) {
       alert('Debes configurar un PIN de seguridad de exactamente 4 dígitos para proteger apartados.');
       return;
     }
+    if (pinMode === 'create' && securityPin && /^(\d)\1{3}$|^(0123|1234|2345|3456|4567|5678|6789|9876|8765|7654|6543|5432|4321|3210)$/.test(securityPin)) {
+      alert('Ese PIN es demasiado predecible. Elige otra combinación.');
+      return;
+    }
+    // Never store the PIN in plain text
+    const newPin = pinMode === 'locked'
+      ? profile.securityPin
+      : (securityPin.trim() ? await hashPin(securityPin.trim()) : undefined);
 
     const updatedProfile: UserProfile = {
       ...profile,
@@ -71,11 +80,12 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
       profession: profession.trim() || profile.profession,
       company: company.trim() ? company.trim() : undefined,
       riskLevel,
-      securityPin: pinMode === 'locked' ? profile.securityPin : (securityPin.trim() || undefined),
+      securityPin: newPin,
       protectedTabs
     };
 
     onUpdateProfile(updatedProfile);
+    if (pinMode === 'create' && newPin) { setPinMode('locked'); setSecurityPin(''); }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -102,7 +112,6 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
 
       if (data.smtpConfigured === false && data.code) {
         // Fallback para desarrollo si SMTP no está configurado
-        console.log('DEV: Código de verificación es', data.code);
         alert(`Modo desarrollo: El código es ${data.code} (revisa la consola)`);
       }
 
@@ -172,7 +181,7 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
         {/* Left column (2 cols span): Edit Profile Form */}
         <div className="lg:col-span-2 space-y-6">
           
-          <form onSubmit={handleSaveSettings} className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-5">
+          <form onSubmit={handleSaveSettings} className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-5">
             <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2 font-mono uppercase tracking-wider">
               <User size={16} className="text-emerald-400" />
               Editar Información de Perfil
@@ -350,7 +359,7 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
                                 <button 
                                   type="button"
                                   onClick={handleVerifyPinCode}
-                                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-lg text-sm transition-colors"
+                                  className="px-4 py-2 bg-white hover:bg-[#E5E5EA] text-black font-bold rounded-lg text-sm transition-colors"
                                 >
                                   Verificar Código
                                 </button>
@@ -370,7 +379,7 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
                               className={`px-4 py-2.5 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${
                                 resetPinEmailSent 
                                   ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                                  : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                                  : 'bg-white hover:bg-[#E5E5EA] text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]'
                               }`}
                             >
                               {resetPinEmailSent ? '📧 Enviando correo...' : '🔒 Cambiar PIN de seguridad'}
@@ -382,11 +391,13 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
                           <label className="block text-[10px] font-mono text-slate-400 uppercase tracking-widest mb-1.5">Configurar PIN Inicial (4 dígitos)</label>
                           <input
                             type="password"
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
                             maxLength={4}
-                            placeholder="0000"
+                            placeholder="••••"
                             value={securityPin}
                             onChange={(e) => setSecurityPin(e.target.value.replace(/\D/g, ''))}
-                            className="w-full sm:w-40 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-center text-lg tracking-[0.5em] text-emerald-400 focus:outline-none focus:border-emerald-500 font-mono font-bold"
+                            className="w-full sm:w-40 bg-[#0E0E10] border border-white/[0.06] rounded-xl px-4 py-3 text-center text-lg tracking-[0.5em] text-emerald-400 focus:outline-none focus:border-emerald-500 font-mono font-bold"
                           />
                         </div>
                       )}
@@ -404,7 +415,7 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
             ) : (
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:opacity-90 font-bold text-slate-950 text-xs transition-all shadow-md mt-4"
+                className="w-full py-3.5 rounded-xl bg-white hover:bg-[#E5E5EA] font-semibold text-black text-xs transition-all shadow-md mt-4"
               >
                 Guardar Ajustes de Perfil
               </button>
@@ -417,7 +428,7 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
         {/* Right column: Backup, GDPR, Reset */}
         <div className="space-y-6">
           
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-5">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-5">
             <h3 className="text-sm font-bold text-slate-200 flex items-center gap-1.5 font-mono uppercase tracking-wider">
               <Globe size={16} className="text-indigo-400" />
               Gestión de Datos y Copias
@@ -542,7 +553,7 @@ export default function Settings({ state, onUpdateProfile, onResetData, onLogout
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-slate-900 to-indigo-950/10 border border-indigo-500/20 p-5 rounded-3xl space-y-3">
+          <div className="bg-gradient-to-r from-slate-900 to-indigo-950/10 border border-indigo-500/20 p-5 rounded-[28px] space-y-3">
             <div className="flex items-center space-x-1.5 text-indigo-400 font-mono text-xs uppercase tracking-wider">
               <Lock size={14} />
               <span>Garantía de Privacidad ALMO AI</span>

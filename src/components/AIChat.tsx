@@ -53,7 +53,7 @@ function parseInlineStyles(rawText: string) {
       parts.push(...parseCurrencyAndCode(plainText));
     }
     parts.push(
-      <strong key={`bold-${match.index}`} className="font-extrabold text-[#00FF66] drop-shadow-[0_0_1px_rgba(0,255,102,0.1)]">
+      <strong key={`bold-${match.index}`} className="font-semibold text-[#00FF66] drop-shadow-[0_0_1px_rgba(0,255,102,0.1)]">
         {match[1]}
       </strong>
     );
@@ -81,7 +81,7 @@ function parseCurrencyAndCode(rawText: string): React.ReactNode[] {
       parts.push(...highlightCurrenciesInText(plainText));
     }
     parts.push(
-      <code key={`code-${match.index}`} className="font-mono text-xs px-1.5 py-0.5 rounded bg-slate-950 border border-[#ffffff10] text-amber-400 font-medium">
+      <code key={`code-${match.index}`} className="font-mono text-xs px-1.5 py-0.5 rounded bg-slate-950 border border-white/[0.08] text-amber-400 font-medium">
         {match[1]}
       </code>
     );
@@ -166,7 +166,7 @@ function renderMarkdownContent(text: string) {
       flushList(i);
       const headerText = line.substring(4);
       renderedElements.push(
-        <h3 key={`h3-${i}`} className="text-base sm:text-lg md:text-xl font-extrabold text-white mt-6 mb-3.5 flex items-center gap-2 border-l-4 border-[#00FF66] pl-3">
+        <h3 key={`h3-${i}`} className="text-base sm:text-lg md:text-xl font-semibold text-white mt-6 mb-3.5 flex items-center gap-2 border-l-4 border-[#00FF66] pl-3">
           {parseInlineStyles(headerText)}
         </h3>
       );
@@ -174,7 +174,7 @@ function renderMarkdownContent(text: string) {
       flushList(i);
       const headerText = line.substring(3);
       renderedElements.push(
-        <h2 key={`h2-${i}`} className="text-lg sm:text-xl md:text-2xl font-extrabold text-white mt-7 mb-4 flex items-center gap-2 border-l-4 border-emerald-500 pl-3">
+        <h2 key={`h2-${i}`} className="text-lg sm:text-xl md:text-2xl font-semibold text-white mt-7 mb-4 flex items-center gap-2 border-l-4 border-emerald-500 pl-3">
           {parseInlineStyles(headerText)}
         </h2>
       );
@@ -182,7 +182,7 @@ function renderMarkdownContent(text: string) {
       flushList(i);
       const headerText = line.substring(2);
       renderedElements.push(
-        <h1 key={`h1-${i}`} className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mt-8 mb-5 flex items-center gap-2 border-l-4 border-emerald-400 pl-3">
+        <h1 key={`h1-${i}`} className="text-xl sm:text-2xl md:text-3xl font-semibold text-white mt-8 mb-5 flex items-center gap-2 border-l-4 border-emerald-400 pl-3">
           {parseInlineStyles(headerText)}
         </h1>
       );
@@ -214,7 +214,7 @@ function renderMarkdownContent(text: string) {
       const itemText = match ? match[2] : line.substring(3);
       listItems.push(
         <li key={`li-${i}`} className="flex items-start space-x-2.5 text-sm sm:text-base md:text-lg text-slate-200 leading-relaxed font-sans font-medium">
-          <span className="flex items-center justify-center font-mono font-extrabold text-[10px] sm:text-[11px] w-5 h-5 rounded bg-[#00FF66]/15 text-[#00FF66] border border-[#00FF66]/20 shrink-0 mt-1 select-none">
+          <span className="flex items-center justify-center font-mono font-semibold text-[10px] sm:text-[11px] w-5 h-5 rounded bg-[#00FF66]/15 text-[#00FF66] border border-[#00FF66]/20 shrink-0 mt-1 select-none">
             {num}
           </span>
           <span className="flex-1">{parseInlineStyles(itemText)}</span>
@@ -592,7 +592,7 @@ export default function AIChat({
           {userRank === 'Normal' && (
             <button
               onClick={handleActivateVIP}
-              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-extrabold text-[10px] hover:shadow-[0_0_15px_rgba(0,255,102,0.4)] transition-all uppercase flex items-center gap-1 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-white text-black hover:bg-[#E5E5EA] font-semibold text-[10px] hover:shadow-[0_0_15px_rgba(0,255,102,0.4)] transition-all uppercase flex items-center gap-1 cursor-pointer"
             >
               <Zap size={10} className="fill-black" /> Hacerse VIP
             </button>
@@ -605,7 +605,7 @@ export default function AIChat({
         {sidebarOpen && (
           <div className="w-72 bg-[#090d16] border-r border-[#ffffff05] flex flex-col shrink-0 h-full absolute inset-y-0 left-0 z-30 lg:static shadow-2xl">
             <div className="p-3.5 border-b border-[#ffffff05] flex items-center justify-between bg-gradient-to-r from-[#00FF66]/5 to-transparent">
-              <span className="text-[10px] font-extrabold bg-gradient-to-r from-[#00FF66] via-emerald-400 to-[#10B981] bg-clip-text text-transparent tracking-widest uppercase font-mono flex items-center gap-1.5">
+              <span className="text-[10px] font-semibold bg-gradient-to-r from-[#00FF66] via-emerald-400 to-[#10B981] bg-clip-text text-transparent tracking-widest uppercase font-mono flex items-center gap-1.5">
                 <Star size={11} className="text-[#00FF66] fill-[#00FF66]/20 animate-pulse" /> CHATS GUARDADOS VIP
               </span>
               <button 
@@ -713,7 +713,7 @@ export default function AIChat({
                   <div className="space-y-4">
                     <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-2 text-center shadow-lg">
                       <Lock size={20} className="text-amber-400 mx-auto" />
-                      <h4 className="text-[11px] font-extrabold text-amber-400 uppercase tracking-wider font-mono">Historial VIP</h4>
+                      <h4 className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider font-mono">Historial VIP</h4>
                       <p className="text-[10px] text-slate-400 leading-normal font-sans">
                         Guarda tus consultas de forma permanente, crea múltiples chats temáticos y reescribe sus títulos.
                       </p>
@@ -721,7 +721,7 @@ export default function AIChat({
                     
                     <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-2xl space-y-1.5 text-center shadow-lg">
                       <Clock size={18} className="text-blue-400 mx-auto animate-pulse" />
-                      <h5 className="text-[10px] font-extrabold text-blue-400 uppercase tracking-wider font-mono">Tiempo Restante</h5>
+                      <h5 className="text-[10px] font-semibold text-blue-400 uppercase tracking-wider font-mono">Tiempo Restante</h5>
                       {timeLeftStr ? (
                         <p className="text-sm font-bold text-blue-400 font-mono tracking-wider">{timeLeftStr}</p>
                       ) : (
@@ -735,7 +735,7 @@ export default function AIChat({
                   
                   <button
                     onClick={handleActivateVIP}
-                    className="w-full mt-4 py-3 bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-extrabold text-xs rounded-xl hover:shadow-[0_0_15px_rgba(0,255,102,0.3)] transition-all uppercase flex items-center justify-center gap-1.5 cursor-pointer shrink-0 tracking-wider font-mono"
+                    className="w-full mt-4 py-3 bg-white text-black hover:bg-[#E5E5EA] font-semibold text-xs rounded-xl hover:shadow-[0_0_15px_rgba(0,255,102,0.3)] transition-all uppercase flex items-center justify-center gap-1.5 cursor-pointer shrink-0 tracking-wider font-mono"
                   >
                     <Zap size={11} className="fill-black animate-bounce" /> RANGO VIP GRATIS
                   </button>
@@ -747,7 +747,7 @@ export default function AIChat({
               <div className="p-3 border-t border-[#ffffff05] bg-slate-950/20">
                 <button 
                   onClick={handleSaveChat}
-                  className="w-full py-2 px-3 bg-gradient-to-r from-[#00FF66] to-[#10B981] hover:opacity-95 text-black font-extrabold text-[11px] rounded-lg transition-all flex items-center justify-center gap-1.5 uppercase tracking-wider font-mono shadow-md cursor-pointer animate-pulse"
+                  className="w-full py-2 px-3 bg-gradient-to-r from-[#00FF66] to-[#10B981] hover:opacity-95 text-black font-semibold text-[11px] rounded-lg transition-all flex items-center justify-center gap-1.5 uppercase tracking-wider font-mono shadow-md cursor-pointer animate-pulse"
                 >
                   <Save size={13} /> {activeChatId ? 'Actualizar guardado' : 'Guardar chat actual'}
                 </button>
@@ -768,7 +768,7 @@ export default function AIChat({
                   <div className="p-4 bg-[#00FF66]/10 text-[#00FF66] rounded-2xl shadow-[0_0_25px_rgba(0,255,102,0.15)] border border-[#00FF66]/20">
                     <BrainCircuit size={36} />
                   </div>
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white tracking-tight">
                     ¿En qué puedo ayudarte hoy, {profile.name}?
                   </h2>
                   <p className="text-sm sm:text-base text-slate-400 font-sans max-w-md mx-auto">
@@ -910,7 +910,7 @@ export default function AIChat({
                   </div>
                   <button
                     onClick={handleActivateVIP}
-                    className="w-full py-3 bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-extrabold text-xs sm:text-sm rounded-xl hover:shadow-[0_0_25px_rgba(0,255,102,0.4)] transition-all uppercase flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3 bg-white text-black hover:bg-[#E5E5EA] font-semibold text-xs sm:text-sm rounded-xl hover:shadow-[0_0_25px_rgba(0,255,102,0.4)] transition-all uppercase flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Zap size={14} className="fill-black" /> ¡ACTIVAR RANGO VIP GRATIS AHORA!
                   </button>
@@ -929,7 +929,7 @@ export default function AIChat({
                   e.preventDefault();
                   handleSendMessage(inputText);
                 }}
-                className="relative flex items-center bg-[#121824] border border-[#ffffff10] rounded-2xl p-1 focus-within:border-[#00FF66]/40 focus-within:ring-2 focus-within:ring-[#00FF66]/10 transition-all shadow-lg"
+                className="relative flex items-center bg-[#121824] border border-white/[0.08] rounded-2xl p-1 focus-within:border-[#00FF66]/40 focus-within:ring-2 focus-within:ring-[#00FF66]/10 transition-all shadow-lg"
               >
                 <input
                   type="text"

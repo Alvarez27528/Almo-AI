@@ -16,10 +16,10 @@ export default function TermsModal({ isOpen, onClose }: TermsModalProps) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
         id="terms-modal-card"
-        className="relative w-full max-w-2xl max-h-[85vh] overflow-hidden bg-[#0A0E17] border border-[#ffffff10] rounded-3xl flex flex-col shadow-[0_10px_50px_rgba(0,0,0,0.8)]"
+        className="relative w-full max-w-2xl max-h-[85vh] overflow-hidden bg-[#0A0E17] border border-white/[0.08] rounded-[28px] flex flex-col shadow-[0_10px_50px_rgba(0,0,0,0.8)]"
       >
         {/* Header */}
-        <div className="p-6 border-b border-[#ffffff10] flex items-center justify-between bg-slate-950/50">
+        <div className="p-6 border-b border-white/[0.08] flex items-center justify-between bg-slate-950/50">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-[#00FF66]/10 text-[#00FF66] border border-[#00FF66]/20">
               <Scale size={20} />
@@ -112,10 +112,10 @@ export default function TermsModal({ isOpen, onClose }: TermsModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-[#ffffff10] bg-slate-950/80 flex justify-end">
+        <div className="p-4 border-t border-white/[0.08] bg-slate-950/80 flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-extrabold text-xs uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer shadow-[0_4px_15px_rgba(0,255,102,0.1)]"
+            className="px-6 py-2.5 rounded-xl bg-white text-black hover:bg-[#E5E5EA] font-semibold text-xs uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer shadow-[0_4px_15px_rgba(0,255,102,0.1)]"
           >
             Entendido
           </button>

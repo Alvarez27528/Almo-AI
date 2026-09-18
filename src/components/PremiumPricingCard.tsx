@@ -15,7 +15,7 @@ export default function PremiumPricingCard({ onUpgrade, isLoading, isPremium }: 
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-[#0f172a] border border-cyan-500/30 p-8 rounded-3xl shadow-2xl relative overflow-hidden"
+      className="bg-[#0f172a] border border-cyan-500/30 p-8 rounded-[28px] shadow-2xl relative overflow-hidden"
     >
       <div className="absolute top-0 right-0 p-4">
         <span className="bg-cyan-500/20 text-cyan-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Recomendado</span>
@@ -25,7 +25,7 @@ export default function PremiumPricingCard({ onUpgrade, isLoading, isPremium }: 
       <p className="text-slate-400 mb-6 text-sm">Todo lo que necesitas para dominar tus finanzas.</p>
       
       <div className="flex items-baseline gap-1 mb-6">
-        <span className="text-4xl font-extrabold text-white">19 €</span>
+        <span className="text-4xl font-semibold text-white">19 €</span>
         <span className="text-slate-500">/ mes</span>
       </div>
       
@@ -64,7 +64,7 @@ export default function PremiumPricingCard({ onUpgrade, isLoading, isPremium }: 
           }
         }}
         disabled={isLoading || isPremium}
-        className="w-full py-4 rounded-xl bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-extrabold text-sm uppercase tracking-wider enabled:hover:scale-[1.02] transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full py-4 rounded-xl bg-white text-black hover:bg-[#E5E5EA] font-semibold text-sm uppercase tracking-wider enabled:hover:scale-[1.02] transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {isPremium ? (
           <CheckCircle2 size={16} className="text-black" />

@@ -157,7 +157,7 @@ export default function Plans({ state, onAddPlan, onDeletePlan }: PlansProps) {
       {/* Plans List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {state.financialPlans.map((plan) => (
-          <div key={plan.id} className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-6 relative overflow-hidden flex flex-col justify-between">
+          <div key={plan.id} className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-6 relative overflow-hidden flex flex-col justify-between">
             
             <div className="space-y-4">
               <div className="flex justify-between items-start">
@@ -250,7 +250,7 @@ export default function Plans({ state, onAddPlan, onDeletePlan }: PlansProps) {
         ))}
 
         {state.financialPlans.length === 0 && (
-          <div className="md:col-span-2 text-center py-24 bg-slate-900 border border-slate-800 rounded-3xl">
+          <div className="md:col-span-2 text-center py-24 bg-[#0E0E10] border border-white/[0.06] rounded-[28px]">
             <Compass className="text-slate-700 mx-auto mb-4" size={48} />
             <p className="text-sm text-slate-500 font-mono">No hay planes inteligentes activos. Haz clic en "Generar Plan" para iniciar.</p>
           </div>
@@ -263,7 +263,7 @@ export default function Plans({ state, onAddPlan, onDeletePlan }: PlansProps) {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6 relative"
+            className="w-full max-w-lg bg-[#0E0E10] border border-white/[0.06] rounded-[28px] p-6 shadow-2xl space-y-6 relative"
           >
             <button 
               onClick={() => setShowGeneratorModal(false)}
@@ -339,7 +339,7 @@ export default function Plans({ state, onAddPlan, onDeletePlan }: PlansProps) {
               ) : (
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:opacity-90 font-bold text-slate-950 text-xs transition-all shadow-md mt-4"
+                  className="w-full py-3.5 rounded-xl bg-white hover:bg-[#E5E5EA] font-semibold text-black text-xs transition-all shadow-md mt-4"
                 >
                   Generar Plan con Inteligencia Artificial
                 </button>

@@ -86,8 +86,13 @@ export default function AuthView() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 letras o números.');
+    if (isSignUp) {
+      if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+        setError('La contraseña debe tener al menos 8 caracteres e incluir letras y números.');
+        return;
+      }
+    } else if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
@@ -243,8 +248,8 @@ export default function AuthView() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setError('La nueva contraseña debe tener al menos 6 letras o números.');
+    if (newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+      setError('La nueva contraseña debe tener al menos 8 caracteres e incluir letras y números.');
       setLoading(false);
       return;
     }
@@ -374,33 +379,38 @@ export default function AuthView() {
 
   return (
     <div id="auth-container" className="min-h-screen bg-[#050505] text-[#F5F5F7] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden font-sans selection:bg-[#00FF66]/20 selection:text-[#00FF66]">
-      {/* Glow ambient background lights */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(0,255,102,0.06)_0,transparent_60%)] pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[radial-gradient(circle_at_center,rgba(0,255,102,0.03)_0,transparent_60%)] pointer-events-none rounded-full" />
+      {/* Ambient aurora */}
+      <div className="aurora w-[36rem] h-[36rem] -top-48 left-1/2 -translate-x-1/2 bg-[#00FF66]/[0.07]" />
+      <div className="aurora w-[28rem] h-[28rem] -bottom-40 -left-24 bg-white/[0.04]" style={{ animationDelay: '-8s' }} />
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-[#121214] border border-[#ffffff08] rounded-3xl p-8 shadow-2xl relative z-10"
+        initial={{ opacity: 0, y: 24, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-[420px] glass rounded-[32px] p-8 sm:p-10 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] relative z-10"
       >
-        {/* Brand Logo and Title */}
+        {/* Brand */}
         <div className="flex flex-col items-center mb-8 text-center">
-          <div className="p-4 rounded-2xl bg-gradient-to-tr from-[#00FF66] to-[#10B981] text-black shadow-[0_0_20px_rgba(0,255,102,0.25)] flex items-center justify-center mb-4">
-            <Landmark size={28} className="stroke-[2.5]" />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-[#00FF66] to-white bg-clip-text text-transparent">
+          <motion.div
+            initial={{ scale: 0.8, rotate: -6, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.1 }}
+            className="w-16 h-16 rounded-[20px] bg-white text-black shadow-[0_20px_40px_-15px_rgba(255,255,255,0.45)] flex items-center justify-center mb-5"
+          >
+            <Landmark size={28} strokeWidth={2.2} />
+          </motion.div>
+          <h1 className="text-[28px] font-semibold tracking-[-0.03em] text-white">
             ALMO AI
           </h1>
-          <p className="text-xs text-[#00FF66] font-mono uppercase tracking-widest mt-1.5 flex items-center gap-1 justify-center">
-            <Sparkles size={12} />
+          <p className="text-[12px] text-[#8E8E93] mt-1 flex items-center gap-1.5 justify-center">
+            <Sparkles size={11} className="text-[#00FF66]" />
             Tu dinero, seguro y ordenado
           </p>
         </div>
 
-        {/* Dynamic headings for simple understanding */}
+        {/* Dynamic headings */}
         <div className="mb-6 text-center">
-          <h2 className="text-xl font-medium text-white">
+          <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-white">
             {isForgotPassword 
               ? recoveryStep === 1
                 ? 'Recuperar Contraseña'
@@ -460,7 +470,7 @@ export default function AuthView() {
                       placeholder="ejemplo@correo.com"
                       value={recoveryEmail}
                       onChange={(e) => setRecoveryEmail(e.target.value)}
-                      className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#8E8E93] text-base focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/20 transition-all font-sans"
+                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#5A5A5E] text-base focus:outline-none focus:bg-white/[0.06] focus:border-white/20 transition-all font-sans"
                     />
                   </div>
                 </div>
@@ -474,7 +484,7 @@ export default function AuthView() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-bold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(0,255,102,0.15)] disabled:opacity-50 disabled:cursor-not-allowed mt-4 cursor-pointer"
+                  className="w-full py-4 rounded-2xl bg-white text-black font-semibold text-[14px] hover:bg-[#E5E5EA] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_10px_30px_-12px_rgba(255,255,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed mt-4 cursor-pointer"
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -528,7 +538,7 @@ export default function AuthView() {
                       placeholder="000000"
                       value={recoveryCode}
                       onChange={(e) => setRecoveryCode(e.target.value.replace(/\D/g, ''))}
-                      className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#8E8E93] text-base focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/20 transition-all font-mono tracking-widest text-center"
+                      className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#8E8E93] text-base focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/20 transition-all font-mono tracking-widest text-center"
                     />
                   </div>
                 </div>
@@ -542,10 +552,11 @@ export default function AuthView() {
                     <input 
                       type="password"
                       required
-                      placeholder="Al menos 6 letras o números"
+                      placeholder={isSignUp ? "Mínimo 8 caracteres, letras y números" : "Tu contraseña"}
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#8E8E93] text-base focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/20 transition-all font-sans"
+                      className="w-full bg-white/[0.04] border border-white/[0.08] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#5A5A5E] text-base focus:outline-none focus:bg-white/[0.06] focus:border-white/20 transition-all font-sans"
                     />
                   </div>
                 </div>
@@ -553,7 +564,7 @@ export default function AuthView() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-bold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(0,255,102,0.15)] disabled:opacity-50 disabled:cursor-not-allowed mt-4 cursor-pointer"
+                  className="w-full py-4 rounded-2xl bg-white text-black font-semibold text-[14px] hover:bg-[#E5E5EA] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_10px_30px_-12px_rgba(255,255,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed mt-4 cursor-pointer"
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -600,7 +611,7 @@ export default function AuthView() {
                   setNewPassword('');
                   setError('');
                 }}
-                className="mt-4 w-full py-4 rounded-2xl bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-bold text-sm hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer shadow-[0_4px_20px_rgba(0,255,102,0.15)]"
+                className="mt-4 w-full py-4 rounded-2xl bg-white text-black font-semibold text-[14px] hover:bg-[#E5E5EA] active:scale-[0.98] transition-all cursor-pointer shadow-[0_10px_30px_-12px_rgba(255,255,255,0.4)]"
               >
                 Volver al inicio de sesión
               </button>
@@ -634,14 +645,14 @@ export default function AuthView() {
                 placeholder="000000"
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl px-4 py-3.5 text-center text-white placeholder-[#8E8E93] text-lg font-mono tracking-widest focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/20 transition-all"
+                className="w-full bg-[#050505] border border-white/[0.08] rounded-2xl px-4 py-3.5 text-center text-white placeholder-[#8E8E93] text-lg font-mono tracking-widest focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/20 transition-all"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-bold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(0,255,102,0.15)] disabled:opacity-50 disabled:cursor-not-allowed mt-6 cursor-pointer"
+              className="w-full py-4 rounded-2xl bg-white text-black font-semibold text-[14px] hover:bg-[#E5E5EA] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_10px_30px_-12px_rgba(255,255,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed mt-6 cursor-pointer"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -679,7 +690,7 @@ export default function AuthView() {
                   placeholder="ejemplo@correo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#8E8E93] text-base focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/20 transition-all font-sans"
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#5A5A5E] text-base focus:outline-none focus:bg-white/[0.06] focus:border-white/20 transition-all font-sans"
                 />
               </div>
             </div>
@@ -712,13 +723,16 @@ export default function AuthView() {
                 <input 
                   type="password"
                   required
-                  placeholder="Al menos 6 letras o números"
+                  placeholder={isSignUp ? "Mínimo 8 caracteres, letras y números" : "Tu contraseña"}
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#8E8E93] text-base focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/20 transition-all font-sans"
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#5A5A5E] text-base focus:outline-none focus:bg-white/[0.06] focus:border-white/20 transition-all font-sans"
                 />
               </div>
             </div>
+
+            {isSignUp && password.length > 0 && <PasswordStrength password={password} />}
 
             {isSignUp && (
               <div>
@@ -731,9 +745,10 @@ export default function AuthView() {
                     type="password"
                     required
                     placeholder="Repite exactamente la contraseña"
+                    autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-[#050505] border border-[#ffffff10] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#8E8E93] text-base focus:outline-none focus:border-[#00FF66]/50 focus:ring-1 focus:ring-[#00FF66]/20 transition-all font-sans"
+                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-2xl pl-12 pr-4 py-3.5 text-white placeholder-[#5A5A5E] text-base focus:outline-none focus:bg-white/[0.06] focus:border-white/20 transition-all font-sans"
                   />
                 </div>
               </div>
@@ -774,7 +789,7 @@ export default function AuthView() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-bold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(0,255,102,0.15)] disabled:opacity-50 disabled:cursor-not-allowed mt-4 cursor-pointer"
+              className="w-full py-4 rounded-2xl bg-white text-black font-semibold text-[14px] hover:bg-[#E5E5EA] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_10px_30px_-12px_rgba(255,255,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed mt-4 cursor-pointer"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -816,7 +831,7 @@ export default function AuthView() {
             <button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full py-3.5 rounded-2xl bg-[#050505] border border-[#ffffff10] text-[#F5F5F7] font-semibold text-xs hover:bg-[#121214] hover:border-white/20 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-[#050505] border border-white/[0.08] text-[#F5F5F7] font-semibold text-xs hover:bg-[#121214] hover:border-white/20 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.859-3.579-7.859-7.989 0-4.41 3.529-7.989 7.859-7.989 2.46 0 4.105 1.025 5.047 1.926l3.245-3.125C18.29 1.144 15.56 0 12.24 0 5.58 0 0 5.37 0 12s5.58 12 12.24 12c6.96 0 11.57-4.89 11.57-11.79 0-.795-.085-1.4-.195-1.925H12.24z"/>
@@ -871,3 +886,36 @@ export default function AuthView() {
   );
 }
 
+
+
+function PasswordStrength({ password }: { password: string }) {
+  const checks = [
+    password.length >= 8,
+    /[a-z]/.test(password) && /[A-Z]/.test(password),
+    /\d/.test(password),
+    /[^a-zA-Z0-9]/.test(password),
+  ];
+  const score = checks.filter(Boolean).length;
+  const labels = ['Muy débil', 'Débil', 'Aceptable', 'Fuerte', 'Excelente'];
+  const colors = ['bg-red-500', 'bg-orange-500', 'bg-amber-400', 'bg-[#00FF66]', 'bg-[#00FF66]'];
+  return (
+    <div className="space-y-1.5 -mt-1" aria-live="polite">
+      <div className="flex gap-1.5">
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} className="h-1 flex-1 rounded-full bg-white/[0.08] overflow-hidden">
+            <motion.div
+              className={`h-full rounded-full ${colors[score]}`}
+              initial={false}
+              animate={{ width: i < score ? '100%' : '0%' }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            />
+          </div>
+        ))}
+      </div>
+      <p className="text-[11px] text-[#8E8E93]">
+        Seguridad: <span className="text-white font-medium">{labels[score]}</span>
+        {score < 3 && ' · añade mayúsculas, números o símbolos'}
+      </p>
+    </div>
+  );
+}

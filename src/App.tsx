@@ -3,25 +3,40 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
-import Transactions from './components/Transactions';
-import AIScanner from './components/AIScanner';
-import AIChat from './components/AIChat';
-import Plans from './components/Plans';
-import Simulator from './components/Simulator';
-import VIPUpgradeView from './components/VIPUpgradeView';
-import Investments from './components/Investments';
-import VintedMode from './components/VintedMode';
-import CalendarView from './components/CalendarView';
-import Challenges from './components/Challenges';
-import Statistics from './components/Statistics';
-import Settings from './components/Settings';
 import AuthView from './components/AuthView';
-import RankManagement from './components/RankManagement';
-import BadgesView from './components/BadgesView';
+import VIPUpgradeView from './components/VIPUpgradeView';
+
+// Code-split every secondary view so the first paint only ships what's needed
+const Onboarding = lazy(() => import('./components/Onboarding'));
+const Transactions = lazy(() => import('./components/Transactions'));
+const AIScanner = lazy(() => import('./components/AIScanner'));
+const AIChat = lazy(() => import('./components/AIChat'));
+const Plans = lazy(() => import('./components/Plans'));
+const Simulator = lazy(() => import('./components/Simulator'));
+const Investments = lazy(() => import('./components/Investments'));
+const VintedMode = lazy(() => import('./components/VintedMode'));
+const CalendarView = lazy(() => import('./components/CalendarView'));
+const Challenges = lazy(() => import('./components/Challenges'));
+const Settings = lazy(() => import('./components/Settings'));
+const RankManagement = lazy(() => import('./components/RankManagement'));
+const BadgesView = lazy(() => import('./components/BadgesView'));
+
+function ViewSkeleton() {
+  return (
+    <div className="space-y-6 animate-fade-up" aria-busy="true" aria-label="Cargando">
+      <div className="skeleton h-8 w-56 rounded-xl" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="skeleton h-32 rounded-3xl" />
+        <div className="skeleton h-32 rounded-3xl" />
+        <div className="skeleton h-32 rounded-3xl" />
+      </div>
+      <div className="skeleton h-72 rounded-3xl" />
+    </div>
+  );
+}
 
 import { PinLock } from './components/PinLock';
 
@@ -196,6 +211,35 @@ export default function App() {
       setActiveTab(tab);
     }
   };
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  // Scroll to top with each view change (like native navigation)
+  useEffect(() => {
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, [activeTab]);
+
+  // Auto re-lock protected areas after the app has been in the background for a while
+  const hiddenAtRef = useRef<number | null>(null);
+  useEffect(() => {
+    const AUTO_LOCK_MS = 2 * 60 * 1000;
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenAtRef.current = Date.now();
+        return;
+      }
+      const hiddenFor = hiddenAtRef.current ? Date.now() - hiddenAtRef.current : 0;
+      hiddenAtRef.current = null;
+      const protectedTabs = state.userProfile?.protectedTabs || ['settings', 'investments'];
+      if (hiddenFor > AUTO_LOCK_MS && state.userProfile?.securityPin && protectedTabs.includes(activeTab)) {
+        setPendingTab(activeTab);
+        setActiveTab('dashboard');
+        setShowPinLock(true);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [activeTab, state.userProfile?.securityPin, state.userProfile?.protectedTabs]);
+
   const [aiTip, setAiTip] = useState('Tu nivel de liquidez es saludable. Te sugerimos destinar un 10% extra a indexados este mes para maximizar interés compuesto.');
   const [loadingTip, setLoadingTip] = useState(true);
 
@@ -232,7 +276,6 @@ export default function App() {
   // Monitor auth state change
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      console.log('onAuthStateChanged: firebaseUser=', firebaseUser);
       setUser(firebaseUser);
       if (firebaseUser) {
         const cacheKey = `fiducia_ai_state_${firebaseUser.uid}`;
@@ -562,15 +605,32 @@ export default function App() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#050505] text-[#F5F5F7] flex flex-col justify-center items-center font-sans">
-        <motion.div 
-          animate={{ scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="flex flex-col items-center gap-4"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col items-center gap-6"
         >
-          <div className="p-4 rounded-2xl bg-gradient-to-tr from-[#00FF66] to-[#10B981] text-black shadow-[0_0_20px_rgba(0,255,102,0.3)]">
-            <Landmark size={32} className="stroke-[2.5]" />
+          <div className="relative">
+            <motion.div
+              className="absolute -inset-6 rounded-full bg-[#00FF66]/10 blur-2xl"
+              animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.1, 0.9] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <div className="relative w-16 h-16 rounded-[20px] bg-white text-black flex items-center justify-center shadow-[0_20px_50px_-15px_rgba(255,255,255,0.4)]">
+              <Landmark size={28} strokeWidth={2.2} />
+            </div>
           </div>
-          <p className="text-xs font-mono text-[#00FF66] uppercase tracking-widest animate-pulse">Conectando de forma segura...</p>
+          <div className="flex items-center gap-1.5">
+            {[0, 1, 2].map(i => (
+              <motion.span
+                key={i}
+                className="w-1.5 h-1.5 rounded-full bg-[#8E8E93]"
+                animate={{ opacity: [0.2, 1, 0.2] }}
+                transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.18 }}
+              />
+            ))}
+          </div>
         </motion.div>
       </div>
     );
@@ -582,7 +642,9 @@ export default function App() {
 
   if (!state.userProfile) {
     return (
-      <Onboarding onComplete={handleOnboardingComplete} />
+      <Suspense fallback={<div className="min-h-screen bg-[#050505]" />}>
+        <Onboarding onComplete={handleOnboardingComplete} />
+      </Suspense>
     );
   }
 
@@ -899,7 +961,7 @@ export default function App() {
         })
         .then(res => res.json())
         .then(data => {
-          console.log('Alerta de cambio crítico de perfil enviada con éxito:', data);
+          void data;
         })
         .catch(err => {
           console.error('Error al enviar alerta de seguridad:', err);
@@ -1017,11 +1079,11 @@ export default function App() {
 
         // Force state reset to initial values
         setState({
-          userProfile: null,
+          userProfile: null as any,
           userRank: 'Normal',
           userLevel: 1,
+          userXP: 0,
           aiTokensUsed: 0,
-          currentView: 'onboarding',
           transactions: [],
           investments: [],
           badges: [],
@@ -1029,9 +1091,11 @@ export default function App() {
           goals: [],
           budgets: [],
           chatHistory: [],
-          unusualMovements: [],
-          vintedItems: [],
-          savedChats: []
+          vintedListings: [],
+          calendarEvents: [],
+          financialPlans: [],
+          savedChats: [],
+          theme: 'dark'
         });
 
         alert('Tu cuenta y todos tus datos han sido eliminados por completo del sistema.');
@@ -1070,247 +1134,217 @@ export default function App() {
     { key: 'rank', label: 'Mi Rango ALMO', icon: <Award size={18} className="text-[#00FF66]" />, isPremium: false }
   ];
 
-  return (
-    <div id="fiducia-app-shell" className="min-h-screen bg-[#050505] text-[#F5F5F7] flex flex-col lg:flex-row font-sans selection:bg-white/10 selection:text-[#F5F5F7] antialiased">
-      
-      {/* Background Soft Ambient Light blur glow */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-white/3 blur-[120px] pointer-events-none rounded-full" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/2 blur-[120px] pointer-events-none rounded-full" />
+  const activeTabMeta = sidebarTabs.find(t => t.key === activeTab);
 
-      {/* MOBILE BAR */}
-      <div className="lg:hidden bg-[#050505] border-b border-[#ffffff10] px-4 py-4 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md bg-[#050505]/90">
-        <div className="flex items-center space-x-2.5">
-          <div className="p-1.5 rounded-lg bg-white text-black">
-            <Landmark size={18} />
+  return (
+    <div id="fiducia-app-shell" className="relative min-h-screen bg-[#050505] text-[#F5F5F7] flex flex-col lg:flex-row font-sans antialiased">
+
+      {/* Ambient aurora background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
+        <div className="aurora w-[38rem] h-[38rem] -top-40 -right-40 bg-[#00FF66]/[0.05]" />
+        <div className="aurora w-[30rem] h-[30rem] -bottom-40 -left-20 bg-white/[0.035]" style={{ animationDelay: '-9s' }} />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_0%,#050505_70%)]" />
+      </div>
+
+      {/* MOBILE TOP BAR */}
+      <header className="lg:hidden glass sticky top-0 z-40 px-4 h-[60px] flex items-center justify-between border-b border-white/[0.06]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-[10px] bg-white text-black flex items-center justify-center">
+            <Landmark size={16} strokeWidth={2.2} />
           </div>
-          <span className="text-md font-extrabold tracking-tight bg-gradient-to-r from-[#F5F5F7] via-white to-[#8E8E93] bg-clip-text text-transparent">ALMO AI</span>
+          <span className="text-[15px] font-semibold tracking-[-0.01em]">ALMO AI</span>
           {!isOnline && (
-            <span className="ml-2 px-2 py-0.5 text-[9px] font-mono font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full animate-pulse">
+            <span className="ml-1 px-2 py-0.5 text-[9px] font-mono font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full">
               OFFLINE
             </span>
           )}
         </div>
         <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 text-[#8E8E93] hover:text-[#F5F5F7] transition-colors"
+          onClick={() => setMobileMenuOpen(o => !o)}
+          aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={mobileMenuOpen}
+          className="w-10 h-10 -mr-1 rounded-full flex items-center justify-center text-[#8E8E93] hover:text-white hover:bg-white/5 active:scale-95"
         >
-          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={mobileMenuOpen ? 'x' : 'menu'}
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="flex"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </motion.span>
+          </AnimatePresence>
         </button>
-      </div>
+      </header>
 
-      {/* Backdrop overlay for mobile menu */}
-      {mobileMenuOpen && (
-        <div 
-          className="lg:hidden fixed inset-x-0 bottom-0 top-[65px] bg-black/70 backdrop-blur-sm z-20"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
+      {/* Mobile backdrop */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="lg:hidden fixed inset-x-0 bottom-0 top-[60px] bg-black/60 backdrop-blur-sm z-20"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Desktop spacer to hold layout space for the fixed sidebar */}
-      <div className="hidden lg:block w-64 shrink-0" />
+      {/* Desktop spacer */}
+      <div className="hidden lg:block w-[248px] shrink-0" />
 
-      {/* SIDEBAR CONTAINER (DESKTOP) & DRAWER (MOBILE) */}
-      <aside 
-        className={`fixed top-[65px] lg:top-0 bottom-0 left-0 z-30 w-64 h-[calc(100dvh-65px)] lg:h-screen bg-[#050505]/98 lg:bg-[#050505] border-r border-[#ffffff10] p-5 flex flex-col justify-between transform transition-transform duration-300 lg:translate-x-0 lg:fixed shrink-0 overflow-y-auto ${
+      {/* SIDEBAR */}
+      <aside
+        className={`fixed top-[60px] lg:top-0 bottom-0 left-0 z-30 w-[248px] h-[calc(100dvh-60px)] lg:h-screen bg-[#0A0A0B]/95 lg:bg-[#070708] backdrop-blur-xl border-r border-white/[0.06] flex flex-col transform transition-transform duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)] lg:translate-x-0 ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="space-y-6">
-          {/* Logo Brand Title */}
-          <div className="hidden lg:flex items-center justify-between pb-4 border-b border-[#ffffff10]">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-xl bg-white text-black shadow-md shadow-white/5">
-                <Landmark size={20} />
-              </div>
-              <div>
-                <span className="text-md font-black tracking-tight bg-gradient-to-r from-white via-[#F5F5F7] to-[#8E8E93] bg-clip-text text-transparent">ALMO AI</span>
-                <p className="text-[9px] font-mono text-[#8E8E93] uppercase tracking-wider">Premium Ecosystem</p>
-              </div>
+        {/* Brand */}
+        <div className="hidden lg:flex items-center justify-between px-5 h-[68px] border-b border-white/[0.06]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-[12px] bg-white text-black flex items-center justify-center shadow-[0_8px_24px_-8px_rgba(255,255,255,0.35)]">
+              <Landmark size={18} strokeWidth={2.2} />
             </div>
-            {/* Connection badge */}
-            <div className="shrink-0">
-              {isOnline ? (
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#00FF66]/10 border border-[#00FF66]/20 text-[#00FF66] text-[10px] font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00FF66] animate-pulse" />
-                  <span>Online</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                  <span>Offline</span>
-                </div>
-              )}
+            <div className="leading-tight">
+              <span className="text-[15px] font-semibold tracking-[-0.01em] block">ALMO AI</span>
+              <span className="text-[10px] text-[#8E8E93] font-medium">Finanzas inteligentes</span>
             </div>
           </div>
-
-          {/* Tab lists */}
-          <nav className="space-y-1 relative">
-            {sidebarTabs.map((tab) => {
-              const isLocked = tab.isPremium && !isVIP;
-              const isActive = activeTab === tab.key;
-              return (
-                <motion.button
-                  key={tab.key}
-                  whileHover={{ scale: 1.015, x: 2 }}
-                  whileTap={{ scale: 0.985 }}
-                  onClick={() => {
-                    if (isLocked) {
-                      handleTabChange('rank');
-                    } else {
-                      handleTabChange(tab.key);
-                    }
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`relative w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-left transition-colors ${
-                    isActive
-                      ? 'text-white font-extrabold'
-                      : isLocked
-                      ? 'text-slate-600 opacity-70 hover:opacity-100 hover:text-slate-400'
-                      : 'text-[#8E8E93] hover:text-[#F5F5F7]'
-                  }`}
-                >
-                  {/* Smooth Sliding Active Background Indicator */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeSidebarTabIndicator"
-                      className="absolute inset-0 bg-[#121214] border-l-2 border-[#00FF66] rounded-xl shadow-sm shadow-[#00FF66]/10"
-                      initial={false}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 32
-                      }}
-                    />
-                  )}
-
-                  <div className="relative z-10 flex items-center gap-3 w-full">
-                    <motion.span
-                      animate={{ scale: isActive ? 1.15 : 1 }}
-                      transition={{ duration: 0.2 }}
-                      className={isActive ? 'text-[#00FF66]' : ''}
-                    >
-                      {tab.icon}
-                    </motion.span>
-                    <span>{tab.label}</span>
-                    {isLocked && <Lock size={12} className="ml-auto opacity-70" />}
-                  </div>
-                </motion.button>
-              );
-            })}
-          </nav>
+          <div
+            className={`w-2 h-2 rounded-full ${isOnline ? 'bg-[#00FF66] shadow-[0_0_8px_rgba(0,255,102,0.8)]' : 'bg-amber-400'}`}
+            title={isOnline ? 'Conectado' : 'Sin conexión'}
+          />
         </div>
 
-        {/* User status and level footer in sidebar */}
-        <div className="pt-4 border-t border-[#ffffff10] space-y-3">
-          <div className="flex flex-col gap-1.5 px-1">
-            <div className="flex justify-between items-center text-[10px] font-mono text-[#8E8E93]">
-              <span>RANGO CLIENTE</span>
-              {state.userRank === 'VIP' ? (
-                <span className="text-[#00FF66] bg-[#00FF66]/10 border border-[#00FF66]/20 px-2 py-0.5 rounded font-extrabold flex items-center gap-0.5 animate-pulse text-[9px] uppercase tracking-wider">
-                  <Award size={10} className="fill-[#00FF66]" /> VIP
-                </span>
-              ) : (
-                <span className="text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded font-bold flex items-center gap-0.5 text-[9px] uppercase tracking-wider">
-                  <Award size={10} className="fill-amber-400" /> Normal
-                </span>
-              )}
-            </div>
-            {state.userRank === 'Normal' ? (
-              <button
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5" aria-label="Navegación principal">
+          {sidebarTabs.map((tab) => {
+            const isLocked = tab.isPremium && !isVIP;
+            const isActive = activeTab === tab.key;
+            return (
+              <motion.button
+                key={tab.key}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
-                  handleTabChange('rank');
+                  handleTabChange(isLocked ? 'rank' : tab.key);
                   setMobileMenuOpen(false);
                 }}
-                className="w-full mt-1 py-1.5 px-2 text-center rounded-lg bg-[#00FF66]/15 hover:bg-[#00FF66] text-[#00FF66] hover:text-black font-extrabold text-[9px] uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer border border-[#00FF66]/20"
+                aria-current={isActive ? 'page' : undefined}
+                className={`group relative w-full flex items-center gap-3 px-3 h-10 rounded-[12px] text-[13px] font-medium text-left ${
+                  isActive
+                    ? 'text-white'
+                    : isLocked
+                    ? 'text-[#5A5A5E] hover:text-[#8E8E93]'
+                    : 'text-[#8E8E93] hover:text-[#F5F5F7] hover:bg-white/[0.04]'
+                }`}
               >
-                <Zap size={10} className="fill-current" /> Gestionar Rango VIP
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  handleTabChange('rank');
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full mt-1 py-1.5 px-2 text-center rounded-lg bg-amber-500/10 hover:bg-amber-500 hover:text-black text-amber-400 font-bold text-[9px] uppercase tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer border border-amber-500/20"
-              >
-                Gestionar Rango Normal
-              </button>
-            )}
-          </div>
-          <div className="flex items-center space-x-3 bg-[#121214] p-2.5 rounded-xl border border-[#ffffff08]">
-            <div className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center font-bold text-xs shadow shadow-white/10">
-              {state.userLevel}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeSidebarTabIndicator"
+                    className="absolute inset-0 bg-white/[0.07] rounded-[12px]"
+                    initial={false}
+                    transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                  />
+                )}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeSidebarTabDot"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-full bg-[#00FF66]"
+                    transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                  />
+                )}
+                <span className={`relative z-10 transition-colors ${isActive ? 'text-[#00FF66]' : 'group-hover:text-white'}`}>
+                  {tab.icon}
+                </span>
+                <span className="relative z-10 truncate">{tab.label}</span>
+                {isLocked && <Lock size={12} className="relative z-10 ml-auto opacity-60" />}
+              </motion.button>
+            );
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="p-3 border-t border-white/[0.06] space-y-2">
+          <button
+            onClick={() => { handleTabChange('rank'); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center justify-between px-3 h-9 rounded-[10px] text-[11px] font-semibold border ${
+              state.userRank === 'VIP'
+                ? 'bg-[#00FF66]/10 border-[#00FF66]/20 text-[#00FF66]'
+                : 'bg-white/[0.03] border-white/[0.06] text-[#8E8E93] hover:text-white hover:bg-white/[0.06]'
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Award size={12} className={state.userRank === 'VIP' ? 'fill-[#00FF66]' : ''} />
+              {state.userRank === 'VIP' ? 'Miembro VIP' : 'Plan Normal'}
+            </span>
+            {state.userRank !== 'VIP' && <span className="flex items-center gap-1 text-[#00FF66]"><Zap size={10} className="fill-current" /> Mejorar</span>}
+          </button>
+
+          <div className="flex items-center gap-3 px-2 py-2 rounded-[12px]">
+            <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-white to-[#C7C7CC] text-black flex items-center justify-center font-semibold text-xs">
+              {profile.name?.charAt(0)?.toUpperCase() || 'A'}
+              <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#0A0A0B] text-[8px] font-bold text-white flex items-center justify-center border border-white/10">
+                {state.userLevel}
+              </span>
             </div>
-            <div className="flex-1">
-              <span className="text-xs font-bold text-[#F5F5F7] block">{profile.name}</span>
-              <span className="text-[10px] text-[#8E8E93] font-mono block">Nivel {state.userLevel} ({state.userXP % 1000} XP)</span>
+            <div className="flex-1 min-w-0">
+              <span className="text-[13px] font-medium text-[#F5F5F7] block truncate">{profile.name}</span>
+              <div className="mt-1 h-1 rounded-full bg-white/[0.06] overflow-hidden">
+                <motion.div
+                  className="h-full bg-[#00FF66] rounded-full"
+                  initial={false}
+                  animate={{ width: `${(state.userXP % 1000) / 10}%` }}
+                  transition={{ type: 'spring', stiffness: 80, damping: 20 }}
+                />
+              </div>
             </div>
           </div>
-          <div className="text-[10px] text-[#8E8E93] flex items-center justify-center gap-1">
-            <ShieldCheck size={12} className="text-[#8E8E93]" />
-            <span>ALMO AI Protection</span>
+          <div className="text-[10px] text-[#5A5A5E] flex items-center justify-center gap-1 pb-1">
+            <ShieldCheck size={11} />
+            <span>Cifrado y protegido</span>
           </div>
         </div>
       </aside>
 
-      {/* MAIN VIEW SCREEN PORTAL */}
-      <main className={`flex-1 mx-auto w-full overflow-x-hidden ${activeTab === 'chat' ? 'p-0 max-w-full h-[calc(100dvh-65px)] lg:h-screen lg:overflow-hidden' : 'p-5 sm:p-8 lg:p-14 max-w-7xl min-h-[calc(100dvh-65px)] lg:min-h-screen'}`}>
-        
-        {/* Connection Status Banners */}
-        {!isOnline && (
-          <div id="offline-banner" className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col md:flex-row items-start md:items-center gap-3 shadow-lg shadow-amber-500/5 animate-pulse">
-            <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400 shrink-0">
-              <WifiOff size={20} />
-            </div>
-            <div className="space-y-0.5">
-              <h4 className="text-xs font-extrabold text-amber-400 tracking-wider uppercase">MODO SIN CONEXIÓN ACTIVO</h4>
-              <p className="text-xs text-[#8E8E93] leading-relaxed">
-                Estás desconectado, pero ALMO AI sigue protegiéndote. Puedes seguir añadiendo movimientos, consultando tus retos y navegando por la app de forma normal. Tus cambios se guardarán localmente y se sincronizarán con la nube de Firebase Store automáticamente cuando recuperes la conexión.
-              </p>
-            </div>
-          </div>
-        )}
+      {/* MAIN */}
+      <main
+        ref={mainRef}
+        className={`relative flex-1 w-full ${activeTab === 'chat' ? 'p-0 h-[calc(100dvh-60px)] lg:h-screen lg:overflow-hidden' : 'px-5 py-6 sm:px-8 sm:py-10 lg:px-14 lg:py-12 min-h-[calc(100dvh-60px)] lg:min-h-screen'}`}
+      >
+        <div className={activeTab === 'chat' ? 'h-full' : 'mx-auto max-w-6xl'}>
 
-        {showSyncSuccess && (
-          <div id="sync-success-banner" className="mb-6 p-4 rounded-2xl bg-[#00FF66]/10 border border-[#00FF66]/20 flex items-center gap-3 shadow-lg shadow-[#00FF66]/5">
-            <div className="p-2 rounded-xl bg-[#00FF66]/15 text-[#00FF66] shrink-0">
-              <CloudLightning size={20} className="animate-bounce" />
-            </div>
-            <div className="space-y-0.5">
-              <h4 className="text-xs font-extrabold text-[#00FF66] tracking-wider uppercase">¡DATOS SINCRONIZADOS!</h4>
-              <p className="text-xs text-[#8E8E93]">
-                La conexión se ha restablecido. Todos tus movimientos y cambios locales se han guardado de forma segura en la nube de Firebase Store.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {isOnline && syncStatus === 'syncing' && (
-          <div id="syncing-banner" className="mb-6 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center gap-3 shadow-lg shadow-blue-500/5">
-            <div className="p-2 rounded-xl bg-blue-500/15 text-blue-400 shrink-0 animate-spin">
-              <RefreshCw size={20} />
-            </div>
-            <div className="space-y-0.5">
-              <h4 className="text-xs font-extrabold text-blue-400 tracking-wider uppercase">SINCRONIZANDO CON LA NUBE</h4>
-              <p className="text-xs text-[#8E8E93]">
-                Guardando tus últimos cambios en la base de datos de Firebase Store de forma segura...
-              </p>
-            </div>
-          </div>
-        )}
+        {/* Floating status toasts */}
+        <div className="pointer-events-none fixed top-[72px] lg:top-6 right-4 lg:right-8 z-50 flex flex-col items-end gap-2">
+          <AnimatePresence>
+            {!isOnline && (
+              <Toast key="offline" icon={<WifiOff size={15} />} tone="amber" title="Sin conexión" desc="Tus cambios se guardan localmente y se sincronizarán al volver." />
+            )}
+            {isOnline && syncStatus === 'syncing' && (
+              <Toast key="syncing" icon={<RefreshCw size={15} className="animate-spin" />} tone="neutral" title="Sincronizando" />
+            )}
+            {showSyncSuccess && (
+              <Toast key="synced" icon={<CloudLightning size={15} />} tone="green" title="Sincronizado" desc="Todo guardado en la nube." />
+            )}
+            {syncStatus === 'error' && isOnline && (
+              <Toast key="error" icon={<CloudOff size={15} />} tone="red" title="Error al sincronizar" desc="Reintentaremos automáticamente." />
+            )}
+          </AnimatePresence>
+        </div>
 
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: 14, scale: 0.985 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.99 }}
-            transition={{
-              duration: 0.28,
-              ease: [0.22, 1, 0.36, 1]
-            }}
+            initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -6, filter: 'blur(4px)' }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             className={activeTab === 'chat' ? 'h-full' : ''}
           >
+            <Suspense fallback={activeTab === 'chat' ? <div className="h-full" /> : <ViewSkeleton />}>
             {activeTab === 'dashboard' && (
               <Dashboard 
                 state={state} 
@@ -1444,8 +1478,10 @@ export default function App() {
                 onLogout={handleLogout}
               />
             )}
+            </Suspense>
           </motion.div>
         </AnimatePresence>
+        </div>
       </main>
 
       <AnimatePresence>
@@ -1468,5 +1504,34 @@ export default function App() {
       </AnimatePresence>
 
     </div>
+  );
+}
+
+
+type ToastTone = 'green' | 'amber' | 'red' | 'neutral';
+const TOAST_TONES: Record<ToastTone, string> = {
+  green: 'text-[#00FF66] border-[#00FF66]/20',
+  amber: 'text-amber-400 border-amber-500/20',
+  red: 'text-red-400 border-red-500/20',
+  neutral: 'text-[#F5F5F7] border-white/10',
+};
+
+function Toast({ icon, title, desc, tone }: { icon: React.ReactNode; title: string; desc?: string; tone: ToastTone }) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -8, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -6, scale: 0.96 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+      role="status"
+      className={`pointer-events-auto glass flex items-start gap-3 pl-3.5 pr-4 py-3 rounded-2xl max-w-[320px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.9)] ${TOAST_TONES[tone]}`}
+    >
+      <span className="mt-0.5 shrink-0">{icon}</span>
+      <div className="min-w-0">
+        <p className="text-[13px] font-semibold text-[#F5F5F7] leading-tight">{title}</p>
+        {desc && <p className="text-[11.5px] text-[#8E8E93] mt-0.5 leading-snug">{desc}</p>}
+      </div>
+    </motion.div>
   );
 }

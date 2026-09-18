@@ -10,8 +10,93 @@ import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
 import dotenv from 'dotenv';
 import Stripe from 'stripe';
 import nodemailer from 'nodemailer';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import crypto from 'crypto';
 
 dotenv.config();
+
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+// ---------------------------------------------------------------------------
+// Security helpers
+// ---------------------------------------------------------------------------
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
+const CODE_RE = /^\d{6}$/;
+
+function normalizeEmail(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const e = raw.trim().toLowerCase();
+  return EMAIL_RE.test(e) && e.length <= 254 ? e : null;
+}
+
+function isValidCode(raw: unknown): raw is string {
+  return typeof raw === 'string' && CODE_RE.test(raw.trim());
+}
+
+/** Cryptographically secure 6 digit code */
+function generateCode(): string {
+  return crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
+}
+
+/** Constant-time string compare to avoid timing attacks */
+function safeEqual(a: string, b: string): boolean {
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ba.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ba, bb);
+}
+
+/** Escape user supplied strings before embedding them into HTML emails */
+function escapeHtml(v: unknown): string {
+  return String(v ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** Public error message: never leak internals in production */
+function publicError(e: any, fallback: string): string {
+  return IS_PROD ? fallback : `${fallback} (${e?.message || 'unknown'})`;
+}
+
+interface OneTimeCode { code: string; expiresAt: number; attempts: number; }
+const MAX_CODE_ATTEMPTS = 5;
+
+function consumeCodeAttempt(store: Map<string, OneTimeCode>, key: string, submitted: string): { ok: boolean; error?: string } {
+  const record = store.get(key);
+  if (!record) return { ok: false, error: 'No se ha solicitado ningún código para este correo.' };
+  if (Date.now() > record.expiresAt) {
+    store.delete(key);
+    return { ok: false, error: 'El código ha expirado. Por favor, solicita uno nuevo.' };
+  }
+  record.attempts += 1;
+  if (record.attempts > MAX_CODE_ATTEMPTS) {
+    store.delete(key);
+    return { ok: false, error: 'Demasiados intentos fallidos. Solicita un código nuevo.' };
+  }
+  if (!safeEqual(record.code, submitted.trim())) {
+    return { ok: false, error: 'El código de verificación es incorrecto.' };
+  }
+  store.delete(key);
+  return { ok: true };
+}
+
+function createMailTransport() {
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  if (!smtpUser || !smtpPass) return null;
+  const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const smtpPort = parseInt(process.env.SMTP_PORT || '587');
+  return nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: { user: smtpUser, pass: smtpPass },
+  });
+}
 
 let stripeClient: Stripe | null = null;
 function getStripe(): Stripe {
@@ -26,9 +111,90 @@ function getStripe(): Stripe {
 }
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
-app.use(express.json({ limit: '10mb' }));
+// Behind reverse proxies (Cloud Run, Render, Vercel, e2b preview) so req.ip & rate limits work
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+
+// Hardened HTTP headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      'default-src': ["'self'"],
+      'script-src': ["'self'", "'unsafe-inline'", 'https://apis.google.com', 'https://www.gstatic.com', 'https://js.stripe.com'],
+      'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
+      'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+      'connect-src': [
+        "'self'",
+        'https://*.googleapis.com',
+        'https://*.firebaseio.com',
+        'wss://*.firebaseio.com',
+        'https://*.firebaseapp.com',
+        'https://*.cloudfunctions.net',
+        'https://api.stripe.com',
+        ...(IS_PROD ? [] : ['ws:', 'wss:', 'http://localhost:*']),
+      ],
+      'frame-src': ["'self'", 'https://*.firebaseapp.com', 'https://js.stripe.com', 'https://checkout.stripe.com', 'https://accounts.google.com'],
+      'object-src': ["'none'"],
+      'base-uri': ["'self'"],
+      'form-action': ["'self'", 'https://checkout.stripe.com'],
+      'frame-ancestors': ["'self'", 'https://*.e2b.app', 'https://*.arena.ai'],
+      'upgrade-insecure-requests': IS_PROD ? [] : null,
+    },
+  },
+  // frame-ancestors (above) supersedes X-Frame-Options and allows the live preview iframe
+  frameguard: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  hsts: IS_PROD ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
+}));
+
+// Minimal permissions policy
+app.use((_req, res, next) => {
+  res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), payment=(self "https://js.stripe.com")');
+  next();
+});
+
+// Body limits: the receipt scanner is the only endpoint that legitimately needs large payloads
+app.use('/api/gemini/scan', express.json({ limit: '8mb' }));
+app.use(express.json({ limit: '100kb' }));
+
+// Rate limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes. Inténtalo de nuevo en unos minutos.' },
+});
+const sensitiveLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Has superado el límite de solicitudes de seguridad. Espera 15 minutos.' },
+});
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 30,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Estás usando la IA demasiado rápido. Espera un momento.' },
+});
+app.use('/api', apiLimiter);
+app.use(['/api/send-verification-code', '/api/request-password-reset', '/api/send-automated-alert', '/api/check-email-registered'], sensitiveLimiter);
+app.use(['/api/verify-code', '/api/confirm-password-reset'], rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: 'draft-7', legacyHeaders: false, message: { error: 'Demasiados intentos. Espera unos minutos.' } }));
+app.use('/api/gemini', aiLimiter);
+
+// Never cache API responses
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 
 app.post('/api/create-checkout-session', async (req, res) => {
   try {
@@ -49,54 +215,51 @@ app.post('/api/create-checkout-session', async (req, res) => {
     });
     res.json({ url: session.url });
   } catch (e: any) {
-    console.error('Stripe Checkout Session Creation Error:', e);
-    res.status(500).json({ error: e.message });
+    console.error('Stripe Checkout Session Creation Error:', e?.message);
+    res.status(500).json({ error: publicError(e, 'No se pudo iniciar el pago.') });
   }
 });
 
 // Verification Code storage and API
-const verificationCodes = new Map<string, { code: string; expiresAt: number }>();
+const verificationCodes = new Map<string, OneTimeCode>();
+const passwordResetCodes = new Map<string, OneTimeCode>();
+
+// Periodic cleanup so the in-memory stores never grow unbounded
+setInterval(() => {
+  const now = Date.now();
+  for (const store of [verificationCodes, passwordResetCodes]) {
+    for (const [k, v] of store) if (v.expiresAt < now) store.delete(k);
+  }
+}, 5 * 60 * 1000).unref();
 
 app.post('/api/send-verification-code', async (req, res) => {
   try {
-    const { email, intent } = req.body;
+    const email = normalizeEmail(req.body?.email);
+    const intent = req.body?.intent === 'settings_pin_change' ? 'settings_pin_change' : 'login';
     if (!email) {
-      return res.status(400).json({ error: 'El correo electrónico es requerido.' });
+      return res.status(400).json({ error: 'El correo electrónico no es válido.' });
     }
 
-    // Generate a random 6-digit code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = generateCode();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+    verificationCodes.set(email, { code, expiresAt, attempts: 0 });
 
-    verificationCodes.set(email.toLowerCase().trim(), { code, expiresAt });
-
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-    const smtpPort = parseInt(process.env.SMTP_PORT || '587');
-
-    console.log(`[VERIFICATION CODE] El código para ${email} es: ${code} (Intent: ${intent || 'login'})`);
-
-    if (!smtpUser || !smtpPass) {
-      // SMTP not configured yet, return code directly to UI for smooth developer preview / fallback
+    const transporter = createMailTransport();
+    if (!transporter) {
+      if (IS_PROD) {
+        console.error('[VERIFICATION CODE] SMTP no configurado en producción.');
+        return res.status(503).json({ error: 'El servicio de correo no está disponible temporalmente.' });
+      }
+      console.log(`[VERIFICATION CODE][DEV] Código para ${email}: ${code} (Intent: ${intent})`);
+      // Dev only: surface the code so the flow can be tested without SMTP
       return res.json({
         success: true,
         smtpConfigured: false,
-        code: code,
+        code,
         message: 'Código generado (Modo de desarrollo: SMTP no configurado, se muestra el código directamente).'
       });
     }
-
-    // Create transporter
-    const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-    });
+    const smtpUser = process.env.SMTP_USER!;
 
     let messageText = 'Has solicitado un código de verificación para registrarte o iniciar sesión en tu cuenta de ALMO AI.';
     let subjectText = 'Tu código de verificación de ALMO AI';
@@ -133,38 +296,23 @@ app.post('/api/send-verification-code', async (req, res) => {
       message: 'Código de verificación enviado por correo.'
     });
   } catch (error: any) {
-    console.error('Error al enviar el código de verificación:', error);
-    res.status(500).json({ error: 'Error al enviar el código de verificación: ' + error.message });
+    console.error('Error al enviar el código de verificación:', error?.message);
+    res.status(500).json({ error: publicError(error, 'Error al enviar el código de verificación.') });
   }
 });
 
 app.post('/api/verify-code', (req, res) => {
-  const { email, code } = req.body;
-  if (!email || !code) {
-    return res.status(400).json({ error: 'Faltan parámetros.' });
+  const email = normalizeEmail(req.body?.email);
+  const code = req.body?.code;
+  if (!email || !isValidCode(code)) {
+    return res.status(400).json({ error: 'Parámetros no válidos.' });
   }
-
-  const record = verificationCodes.get(email.toLowerCase().trim());
-  if (!record) {
-    return res.status(400).json({ error: 'No se ha solicitado ningún código para este correo.' });
-  }
-
-  if (Date.now() > record.expiresAt) {
-    verificationCodes.delete(email.toLowerCase().trim());
-    return res.status(400).json({ error: 'El código ha expirado. Por favor, solicita uno nuevo.' });
-  }
-
-  if (record.code !== code.trim()) {
-    return res.status(400).json({ error: 'El código de verificación es incorrecto.' });
-  }
-
-  // Code is valid
-  verificationCodes.delete(email.toLowerCase().trim());
+  const result = consumeCodeAttempt(verificationCodes, email, code);
+  if (!result.ok) return res.status(400).json({ error: result.error });
   res.json({ success: true });
 });
 
-// Custom Password Reset Storage and Routes (Uses User's Custom SMTP config)
-const passwordResetCodes = new Map<string, { code: string; expiresAt: number }>();
+// Custom Password Reset Routes (Uses User's Custom SMTP config)
 let isFirebaseAdminInitialized = false;
 
 async function ensureFirebaseAdmin() {
@@ -218,7 +366,7 @@ async function verifyUserExists(email: string): Promise<boolean> {
 
   // 2. Fallback to Firebase Auth REST API with correct credentials & authorized domain
   try {
-    const apiKey = "AIzaSyD1BS1c3KdV_g9G2k6b1iaMORXMGyNmovE";
+    const apiKey = process.env.FIREBASE_WEB_API_KEY || "AIzaSyD1BS1c3KdV_g9G2k6b1iaMORXMGyNmovE";
     const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -247,12 +395,10 @@ async function verifyUserExists(email: string): Promise<boolean> {
 
 app.post('/api/check-email-registered', async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'El correo electrónico es requerido.' });
+    const emailKey = normalizeEmail(req.body?.email);
+    if (!emailKey) {
+      return res.status(400).json({ error: 'El correo electrónico no es válido.' });
     }
-
-    const emailKey = email.toLowerCase().trim();
     const exists = await verifyUserExists(emailKey);
     return res.json({ registered: exists });
   } catch (error: any) {
@@ -263,12 +409,10 @@ app.post('/api/check-email-registered', async (req, res) => {
 
 app.post('/api/request-password-reset', async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'El correo electrónico es requerido.' });
+    const emailKey = normalizeEmail(req.body?.email);
+    if (!emailKey) {
+      return res.status(400).json({ error: 'El correo electrónico no es válido.' });
     }
-
-    const emailKey = email.toLowerCase().trim();
 
     // Verify first if user exists in Firebase Auth before sending code
     const exists = await verifyUserExists(emailKey);
@@ -276,39 +420,25 @@ app.post('/api/request-password-reset', async (req, res) => {
       return res.status(404).json({ error: 'No existe ninguna cuenta registrada con este correo electrónico.' });
     }
 
-    // Generate custom 6-digit password reset code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = generateCode();
     const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes
+    passwordResetCodes.set(emailKey, { code, expiresAt, attempts: 0 });
 
-    passwordResetCodes.set(emailKey, { code, expiresAt });
-
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-    const smtpPort = parseInt(process.env.SMTP_PORT || '587');
-
-    console.log(`[PASSWORD RESET CODE] El código de restablecimiento para ${emailKey} es: ${code}`);
-
-    if (!smtpUser || !smtpPass) {
-      // Return code directly for local testing / development when SMTP is not configured
+    const transporter = createMailTransport();
+    if (!transporter) {
+      if (IS_PROD) {
+        console.error('[PASSWORD RESET] SMTP no configurado en producción.');
+        return res.status(503).json({ error: 'El servicio de correo no está disponible temporalmente.' });
+      }
+      console.log(`[PASSWORD RESET CODE][DEV] Código para ${emailKey}: ${code}`);
       return res.json({
         success: true,
         smtpConfigured: false,
-        code: code,
+        code,
         message: 'Código de recuperación generado (Desarrollo: SMTP no configurado, se muestra en pantalla).'
       });
     }
-
-    // Create transporter
-    const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-    });
+    const smtpUser = process.env.SMTP_USER!;
 
     // Send email using user's configured SMTP
     await transporter.sendMail({
@@ -346,66 +476,70 @@ app.post('/api/request-password-reset', async (req, res) => {
       message: 'Código de recuperación de contraseña enviado con éxito.'
     });
   } catch (error: any) {
-    console.error('Error al solicitar recuperación de contraseña:', error);
-    res.status(500).json({ error: 'Error al enviar código de recuperación: ' + error.message });
+    console.error('Error al solicitar recuperación de contraseña:', error?.message);
+    res.status(500).json({ error: publicError(error, 'Error al enviar código de recuperación.') });
   }
 });
 
 app.post('/api/confirm-password-reset', async (req, res) => {
   try {
-    const { email, code, newPassword } = req.body;
-    if (!email || !code || !newPassword) {
-      return res.status(400).json({ error: 'Faltan parámetros requeridos (email, code, newPassword).' });
+    const emailKey = normalizeEmail(req.body?.email);
+    const { code, newPassword } = req.body ?? {};
+    if (!emailKey || !isValidCode(code) || typeof newPassword !== 'string') {
+      return res.status(400).json({ error: 'Parámetros no válidos.' });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres.' });
+    if (newPassword.length < 8 || newPassword.length > 128) {
+      return res.status(400).json({ error: 'La nueva contraseña debe tener entre 8 y 128 caracteres.' });
+    }
+    if (!/[a-zA-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+      return res.status(400).json({ error: 'La contraseña debe incluir al menos una letra y un número.' });
     }
 
-    const emailKey = email.toLowerCase().trim();
+    // Peek without consuming: we only burn the code once the password is actually updated
     const record = passwordResetCodes.get(emailKey);
-
-    if (!record) {
-      return res.status(400).json({ error: 'No se ha solicitado ningún restablecimiento para este correo.' });
-    }
-
+    if (!record) return res.status(400).json({ error: 'No se ha solicitado ningún restablecimiento para este correo.' });
     if (Date.now() > record.expiresAt) {
       passwordResetCodes.delete(emailKey);
       return res.status(400).json({ error: 'El código ha expirado. Por favor, solicita uno nuevo.' });
     }
-
-    if (record.code !== code.trim()) {
+    record.attempts += 1;
+    if (record.attempts > MAX_CODE_ATTEMPTS) {
+      passwordResetCodes.delete(emailKey);
+      return res.status(400).json({ error: 'Demasiados intentos fallidos. Solicita un código nuevo.' });
+    }
+    if (!safeEqual(record.code, code.trim())) {
       return res.status(400).json({ error: 'El código de seguridad ingresado es incorrecto.' });
     }
 
     // Verify and update user password via Firebase Admin SDK
     await ensureFirebaseAdmin();
     if (!isFirebaseAdminInitialized) {
-      return res.status(500).json({ error: 'El servicio de administración de Firebase no está disponible para cambiar la contraseña.' });
+      return res.status(503).json({ error: 'El servicio de administración no está disponible para cambiar la contraseña.' });
     }
 
     const { getAuth } = await import('firebase-admin/auth');
     const userRecord = await getAuth().getUserByEmail(emailKey);
     await getAuth().updateUser(userRecord.uid, { password: newPassword });
+    // Invalidate every existing session for this account
+    await getAuth().revokeRefreshTokens(userRecord.uid).catch(() => {});
 
-    // Clean code
     passwordResetCodes.delete(emailKey);
 
     res.json({ success: true, message: 'Contraseña restablecida correctamente.' });
   } catch (error: any) {
-    console.error('Error al restablecer contraseña:', error);
-    let msg = error.message;
-    if (error.code === 'auth/user-not-found') {
-      msg = 'No se encontró ninguna cuenta asociada a este correo electrónico.';
+    console.error('Error al restablecer contraseña:', error?.message);
+    if (error?.code === 'auth/user-not-found') {
+      return res.status(404).json({ error: 'No se encontró ninguna cuenta asociada a este correo electrónico.' });
     }
-    res.status(500).json({ error: 'Error al actualizar contraseña: ' + msg });
+    res.status(500).json({ error: publicError(error, 'Error al actualizar contraseña.') });
   }
 });
 
 app.post('/api/delete-account', async (req, res) => {
   try {
-    const { idToken } = req.body;
-    if (!idToken) {
+    const idToken = req.body?.idToken;
+    if (typeof idToken !== 'string' || idToken.length < 20 || idToken.length > 4096) {
       return res.status(400).json({ error: 'Token de identificación requerido.' });
     }
 
@@ -418,7 +552,8 @@ app.post('/api/delete-account', async (req, res) => {
     const { getFirestore } = await import('firebase-admin/firestore');
 
     // 1. Verify the ID token to ensure request is authentic and find the user UID
-    const decodedToken = await getAuth().verifyIdToken(idToken);
+    // checkRevoked=true: a token from a revoked session can't delete an account
+    const decodedToken = await getAuth().verifyIdToken(idToken, true);
     const uid = decodedToken.uid;
 
     console.log(`[USER DELETE REQUEST] Iniciando borrado completo de cuenta para UID: ${uid}`);
@@ -438,10 +573,11 @@ app.post('/api/delete-account', async (req, res) => {
       message: 'Tu cuenta y todos tus datos asociados han sido eliminados por completo.' 
     });
   } catch (error: any) {
-    console.error('Error crítico al realizar el borrado completo de la cuenta:', error);
-    res.status(500).json({ 
-      error: 'Error interno en el borrado completo de la cuenta: ' + error.message 
-    });
+    console.error('Error crítico al realizar el borrado completo de la cuenta:', error?.message);
+    if (error?.code?.startsWith?.('auth/')) {
+      return res.status(401).json({ error: 'Sesión no válida o expirada. Vuelve a iniciar sesión.' });
+    }
+    res.status(500).json({ error: publicError(error, 'Error interno al borrar la cuenta.') });
   }
 });
 
@@ -453,8 +589,15 @@ async function sendAutomatedAlert(type: 'critical_change' | 'unusual_login', ema
   const smtpPort = parseInt(process.env.SMTP_PORT || '587');
 
   const now = new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' });
-  const ip = details.ip || '127.0.0.1';
-  const device = details.device || 'Dispositivo de escritorio';
+  const ip = escapeHtml(String(details.ip || 'No disponible').slice(0, 64));
+  const device = escapeHtml(String(details.device || 'Dispositivo de escritorio').slice(0, 200));
+  // Sanitize any other free-text fields that end up in the HTML template
+  details = {
+    ...details,
+    name: escapeHtml(String(details.name || 'Usuario').slice(0, 80)),
+    changes: details.changes ? escapeHtml(String(details.changes).slice(0, 1000)) : undefined,
+    reason: details.reason ? escapeHtml(String(details.reason).slice(0, 500)) : undefined,
+  };
 
   let subject = '';
   let contentHtml = '';
@@ -585,16 +728,17 @@ async function sendAutomatedAlert(type: 'critical_change' | 'unusual_login', ema
 // Route to trigger SMTP alerts
 app.post('/api/send-automated-alert', async (req, res) => {
   try {
-    const { type, email, details } = req.body;
-    if (!type || !email) {
-      return res.status(400).json({ error: 'Faltan parámetros requeridos (type, email).' });
+    const { type, details } = req.body ?? {};
+    const email = normalizeEmail(req.body?.email);
+    if ((type !== 'critical_change' && type !== 'unusual_login') || !email) {
+      return res.status(400).json({ error: 'Parámetros no válidos.' });
     }
-
-    const result = await sendAutomatedAlert(type, email, details || {});
+    const safeDetails = (details && typeof details === 'object') ? { ...details, ip: req.ip } : { ip: req.ip };
+    const result = await sendAutomatedAlert(type, email, safeDetails);
     res.json(result);
   } catch (err: any) {
-    console.error('Error in send-automated-alert endpoint:', err);
-    res.status(500).json({ error: err.message });
+    console.error('Error in send-automated-alert endpoint:', err?.message);
+    res.status(500).json({ error: publicError(err, 'No se pudo enviar la alerta.') });
   }
 });
 
@@ -636,7 +780,7 @@ function getGeminiClient(): GoogleGenAI {
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    hasApiKey: !!process.env.GEMINI_API_KEY,
+    ...(IS_PROD ? {} : { hasApiKey: !!process.env.GEMINI_API_KEY }),
     time: new Date().toISOString(),
   });
 });
@@ -644,7 +788,10 @@ app.get('/api/health', (req, res) => {
 // 1. AI CHAT WITH CONTEXT
 app.post('/api/gemini/chat', async (req, res) => {
   try {
-    const { message, history, profile, stats } = req.body;
+    const { history, profile, stats } = req.body ?? {};
+    const message = typeof req.body?.message === 'string' ? req.body.message.trim().slice(0, 4000) : '';
+    if (!message) return res.status(400).json({ error: 'Mensaje vacío.' });
+    if (history && !Array.isArray(history)) return res.status(400).json({ error: 'Historial no válido.' });
     const ai = getGeminiClient();
 
     // Prepare a comprehensive, high-stakes system instruction detailing the user's financial profile
@@ -843,10 +990,13 @@ app.get('/api/gemini/scan/usage', async (req, res) => {
 app.post('/api/gemini/scan', async (req, res) => {
   let rawText = '';
   try {
-    const { imageBase64, mockReceiptType, userEmail, userId } = req.body;
-    const identifier = userId || userEmail;
+    const { imageBase64, mockReceiptType, userEmail, userId } = req.body ?? {};
+    const identifier = (typeof userId === 'string' && userId.slice(0, 128)) || normalizeEmail(userEmail);
     if (!identifier) {
       return res.status(400).json({ error: 'Email or UserID required' });
+    }
+    if (imageBase64 !== undefined && (typeof imageBase64 !== 'string' || imageBase64.length > 6 * 1024 * 1024)) {
+      return res.status(413).json({ error: 'La imagen es demasiado grande (máx. ~4MB).' });
     }
     
     // Check scan limit
@@ -1142,7 +1292,7 @@ app.post('/api/gemini/scan', async (req, res) => {
         category: 'Otros'
       });
     }
-    res.status(500).json({ error: error.message || 'Failed to scan receipt' });
+    res.status(500).json({ error: publicError(error, 'No se pudo analizar el ticket.') });
   }
 });
 
@@ -1175,11 +1325,31 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, {
+      index: false,
+      setHeaders(res, filePath) {
+        if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        } else {
+          res.setHeader('Cache-Control', 'no-cache');
+        }
+      },
+    }));
     app.get('*', (req, res) => {
+      if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });
+      res.setHeader('Cache-Control', 'no-cache');
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
+
+  // Unknown API routes & central error handler (bad JSON, oversized bodies, etc.)
+  app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));
+  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    if (err?.type === 'entity.too.large') return res.status(413).json({ error: 'Payload demasiado grande.' });
+    if (err?.type === 'entity.parse.failed') return res.status(400).json({ error: 'JSON no válido.' });
+    console.error('Unhandled error:', err?.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  });
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server fully running on http://0.0.0.0:${PORT} under environment: ${process.env.NODE_ENV || 'development'}`);

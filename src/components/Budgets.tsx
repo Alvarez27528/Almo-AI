@@ -98,7 +98,7 @@ export default function Budgets({ state }: BudgetsProps) {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Rule Card 50/30/20 */}
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-6">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-6">
             <div>
               <h2 className="text-md font-bold text-slate-100">Distribución de Ley 50/30/20</h2>
               <p className="text-xs text-slate-500 mt-0.5">Distribución ideal recomendada por ALMO AI basada en tus ingresos netos de {formatCurrency(stats.totalIncome, profile.currency)}.</p>
@@ -176,7 +176,7 @@ export default function Budgets({ state }: BudgetsProps) {
           </div>
 
           {/* Active category budget lines */}
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-5">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-5">
             <h3 className="text-sm font-bold text-slate-200 font-mono uppercase tracking-wider flex items-center gap-2">
               <Sliders size={16} className="text-emerald-400" />
               Límites Individuales de Gasto
@@ -196,7 +196,7 @@ export default function Budgets({ state }: BudgetsProps) {
                 return (
                   <div key={idx} className="bg-slate-950/40 p-4 rounded-2xl border border-slate-850 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-lg shadow-inner">
+                      <div className="w-10 h-10 rounded-xl bg-[#0E0E10] border border-white/[0.06] flex items-center justify-center text-lg shadow-inner">
                         {cat.icon}
                       </div>
                       <div>
@@ -243,7 +243,7 @@ export default function Budgets({ state }: BudgetsProps) {
         <div className="space-y-6">
           
           {/* Configuration and Threshold settings */}
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-6">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-6">
             <h3 className="text-sm font-bold text-slate-200 flex items-center gap-1.5 font-mono uppercase tracking-wider">
               <Settings size={16} className="text-slate-400" />
               Parámetros de Alerta
@@ -319,7 +319,7 @@ export default function Budgets({ state }: BudgetsProps) {
           </div>
 
           {/* Advice card on budgets */}
-          <div className="bg-gradient-to-r from-slate-900 to-amber-950/10 border border-amber-500/20 p-5 rounded-3xl space-y-4">
+          <div className="bg-gradient-to-r from-slate-900 to-amber-950/10 border border-amber-500/20 p-5 rounded-[28px] space-y-4">
             <div className="flex items-center space-x-1.5 text-amber-400 font-mono text-xs uppercase tracking-wider">
               <Sparkles size={14} />
               <span>Ajustes Inteligentes recomendados</span>

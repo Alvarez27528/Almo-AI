@@ -170,7 +170,7 @@ export default function AIScanner({ state, onSaveScannedTransaction, onNavigateT
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Left Side: Receipt selector & image viewport */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-6">
+        <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-6">
           <h2 className="text-md font-bold text-slate-200">1. Sube el Ticket</h2>
           
           {/* File Upload zone */}
@@ -205,7 +205,7 @@ export default function AIScanner({ state, onSaveScannedTransaction, onNavigateT
           <button
             onClick={() => startScanning()}
             disabled={scanning || !imageFile}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 hover:shadow-lg hover:shadow-emerald-500/20 font-bold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
+            className="w-full py-4 rounded-xl bg-white hover:bg-[#E5E5EA] text-slate-950 hover:shadow-lg hover:shadow-emerald-500/20 font-bold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
           >
             <Sparkles size={16} />
             <span>{scanning ? 'Escaneando con IA...' : 'Comenzar Escaneo Inteligente'}</span>
@@ -213,7 +213,7 @@ export default function AIScanner({ state, onSaveScannedTransaction, onNavigateT
         </div>
 
         {/* Right Side: Scan progression and OCR results */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl flex flex-col justify-between min-h-[480px]">
+        <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] flex flex-col justify-between min-h-[480px]">
           
           <AnimatePresence mode="wait">
             
@@ -337,7 +337,7 @@ export default function AIScanner({ state, onSaveScannedTransaction, onNavigateT
                       <span>Base + IVA de ley:</span>
                       <span>{formatCurrency(result.tax, profile.currency)}</span>
                     </div>
-                    <div className="text-lg font-extrabold text-white flex justify-between items-center font-mono">
+                    <div className="text-lg font-semibold text-white flex justify-between items-center font-mono">
                       <span>Total Factura:</span>
                       <span>{formatCurrency(result.total, profile.currency)}</span>
                     </div>

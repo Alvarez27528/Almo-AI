@@ -190,7 +190,7 @@ export default function UnusualMovements({ state }: UnusualMovementsProps) {
                 }`}
               >
                 {/* FRONT OF THE FLASHCARD */}
-                <div className="absolute inset-0 backface-hidden bg-[#121214] border border-[#ffffff08] hover:border-[#00FF66]/30 p-4 rounded-2xl flex flex-col justify-between transition-all duration-300 group-hover:shadow-lg group-hover:shadow-[#00FF66]/2">
+                <div className="absolute inset-0 backface-hidden bg-[#0E0E10] border border-white/[0.06] hover:border-[#00FF66]/30 p-4 rounded-2xl flex flex-col justify-between transition-all duration-300 group-hover:shadow-lg group-hover:shadow-[#00FF66]/2">
                   <div className="flex items-start justify-between">
                     <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
                       isIncome ? 'bg-[#00FF66]/10 text-[#00FF66]' :
@@ -207,7 +207,7 @@ export default function UnusualMovements({ state }: UnusualMovementsProps) {
 
                   <div className="my-2">
                     <div className="flex items-baseline gap-1">
-                      <span className={`text-2xl font-black ${
+                      <span className={`text-2xl font-semibold ${
                         isIncome ? 'text-[#00FF66]' :
                         isInvestment ? 'text-blue-400' :
                         'text-rose-400'

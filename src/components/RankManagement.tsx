@@ -108,7 +108,7 @@ export default function RankManagement({ state, onSetUserRank }: RankManagementP
     <div id="rank-management-view" className="space-y-8 pb-12">
       
       {/* Banner Superior con efecto Cyberpunk */}
-      <div className="relative bg-[#0B0F19] border border-[#ffffff10] rounded-3xl p-6 sm:p-8 overflow-hidden shadow-2xl">
+      <div className="relative bg-[#0B0F19] border border-white/[0.08] rounded-[28px] p-6 sm:p-8 overflow-hidden shadow-2xl">
         <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-[#00FF66]/10 to-transparent pointer-events-none rounded-bl-full blur-3xl animate-pulse" />
         <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-gradient-to-tr from-amber-500/5 to-transparent pointer-events-none rounded-tr-full blur-3xl" />
 
@@ -117,7 +117,7 @@ export default function RankManagement({ state, onSetUserRank }: RankManagementP
             <span className="text-[10px] font-mono text-[#00FF66] uppercase tracking-widest bg-[#00FF66]/10 px-3 py-1 rounded-full border border-[#00FF66]/20 inline-block">
               ALMO AI VIP Program
             </span>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
               Gestión de Rango de Cuenta
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 font-sans max-w-xl">
@@ -125,7 +125,7 @@ export default function RankManagement({ state, onSetUserRank }: RankManagementP
             </p>
           </div>
 
-          <div className="flex items-center space-x-3 bg-slate-950/80 border border-[#ffffff10] p-4 rounded-2xl w-full md:w-auto">
+          <div className="flex items-center space-x-3 bg-slate-950/80 border border-white/[0.08] p-4 rounded-2xl w-full md:w-auto">
             <div className={`p-3 rounded-xl shrink-0 ${
               currentRank === 'VIP' 
                 ? 'bg-[#00FF66]/10 text-[#00FF66] shadow-[0_0_15px_rgba(0,255,102,0.15)] border border-[#00FF66]/20' 
@@ -135,7 +135,7 @@ export default function RankManagement({ state, onSetUserRank }: RankManagementP
             </div>
             <div>
               <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider block">Tu Rango Actual</span>
-              <span className={`text-lg font-black tracking-tight ${
+              <span className={`text-lg font-semibold tracking-tight ${
                 currentRank === 'VIP' ? 'text-[#00FF66]' : 'text-amber-400'
               }`}>
                 {currentRank === 'VIP' ? 'RANGO VIP PREMIUM' : 'RANGO NORMAL'}
@@ -149,14 +149,14 @@ export default function RankManagement({ state, onSetUserRank }: RankManagementP
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Tarjeta de Rango Normal (Estilo Cobre/Ámbar Metalizado - No soso!) */}
-        <div className="bg-gradient-to-br from-[#1A120B] via-[#0E0A06] to-[#050505] border border-amber-500/20 rounded-3xl p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-xl">
+        <div className="bg-gradient-to-br from-[#1A120B] via-[#0E0A06] to-[#050505] border border-amber-500/20 rounded-[28px] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-xl">
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-amber-400/5 to-transparent pointer-events-none rounded-bl-full" />
           
           <div>
             <div className="flex justify-between items-start mb-6">
               <div>
                 <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest font-bold">Plan Estándar</span>
-                <h3 className="text-xl font-extrabold text-white mt-1">Rango Normal</h3>
+                <h3 className="text-xl font-semibold text-white mt-1">Rango Normal</h3>
               </div>
               {currentRank === 'Normal' && (
                 <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold rounded-lg text-[10px] uppercase tracking-wider flex items-center gap-1">
@@ -201,7 +201,7 @@ export default function RankManagement({ state, onSetUserRank }: RankManagementP
           <PremiumPricingCard onUpgrade={handleVIPPayment} isLoading={isLoading} isPremium={currentRank === 'VIP'} />
           
           {/* Fair Use Policy link */}
-          <div className="bg-[#0B0F19]/40 border border-[#ffffff05] rounded-3xl p-4 text-center space-y-1">
+          <div className="bg-[#0B0F19]/40 border border-[#ffffff05] rounded-[28px] p-4 text-center space-y-1">
             <p className="text-[11px] text-slate-500 font-sans">
               El Plan Premium está sujeto a la política de uso justo de tokens de IA para evitar abusos automatizados.
             </p>
@@ -218,7 +218,7 @@ export default function RankManagement({ state, onSetUserRank }: RankManagementP
       </div>
 
       {/* Sello de seguridad */}
-      <div className="p-6 bg-slate-950/40 border border-[#ffffff05] rounded-3xl text-center flex flex-col items-center justify-center space-y-2">
+      <div className="p-6 bg-slate-950/40 border border-[#ffffff05] rounded-[28px] text-center flex flex-col items-center justify-center space-y-2">
         <div className="p-2 bg-[#ffffff05] text-slate-400 rounded-full">
           <ShieldCheck size={20} className="text-[#00FF66]" />
         </div>

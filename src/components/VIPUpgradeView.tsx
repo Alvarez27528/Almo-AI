@@ -14,7 +14,7 @@ interface VIPUpgradeViewProps {
 
 export default function VIPUpgradeView({ featureName, featureDescription, onUpgrade }: VIPUpgradeViewProps) {
   return (
-    <div className="min-h-[480px] bg-[#0B0F19] border border-[#ffffff10] rounded-3xl p-6 sm:p-10 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-2xl">
+    <div className="min-h-[480px] bg-[#0B0F19] border border-white/[0.08] rounded-[28px] p-6 sm:p-10 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-2xl">
       {/* Absolute Ambient Background Glows */}
       <div className="absolute -top-24 -left-24 w-80 h-80 bg-[#00FF66]/5 blur-[100px] rounded-full pointer-events-none" />
       <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-[#10B981]/5 blur-[100px] rounded-full pointer-events-none" />
@@ -24,7 +24,7 @@ export default function VIPUpgradeView({ featureName, featureDescription, onUpgr
         <div className="p-5 rounded-2xl bg-[#00FF66]/10 text-[#00FF66] shadow-[0_0_20px_rgba(0,255,102,0.15)] flex items-center justify-center border border-[#00FF66]/20">
           <Lock size={32} />
         </div>
-        <div className="absolute -bottom-2 -right-2 p-1.5 rounded-lg bg-black border border-[#ffffff10] text-[#00FF66] animate-pulse">
+        <div className="absolute -bottom-2 -right-2 p-1.5 rounded-lg bg-black border border-white/[0.08] text-[#00FF66] animate-pulse">
           <Zap size={14} className="fill-[#00FF66]" />
         </div>
       </div>
@@ -33,7 +33,7 @@ export default function VIPUpgradeView({ featureName, featureDescription, onUpgr
         MÓDULO EXCLUSIVO VIP
       </span>
 
-      <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-2 max-w-lg">
+      <h2 className="text-xl sm:text-2xl font-semibold text-white tracking-tight mb-2 max-w-lg">
         Desbloquea {featureName}
       </h2>
       
@@ -61,7 +61,7 @@ export default function VIPUpgradeView({ featureName, featureDescription, onUpgr
       {/* Call to action button */}
       <button
         onClick={onUpgrade}
-        className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#00FF66] to-[#10B981] text-black font-extrabold text-xs sm:text-sm tracking-wide uppercase shadow-[0_0_20px_rgba(0,255,102,0.25)] hover:shadow-[0_0_35px_rgba(0,255,102,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
+        className="px-8 py-3.5 rounded-xl bg-white text-black hover:bg-[#E5E5EA] font-semibold text-xs sm:text-sm tracking-wide uppercase shadow-[0_0_20px_rgba(0,255,102,0.25)] hover:shadow-[0_0_35px_rgba(0,255,102,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
       >
         <Zap size={14} className="fill-black" /> Activar Rango VIP Gratis
         <ChevronRight size={14} className="stroke-[2.5]" />

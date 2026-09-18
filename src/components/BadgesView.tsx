@@ -215,13 +215,13 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
     <div id="badges-view-container" className="space-y-8 sm:space-y-10 px-1 sm:px-4">
       
       {/* Header section */}
-      <div className="border-b border-[#ffffff10] pb-6">
+      <div className="border-b border-white/[0.08] pb-6">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full border bg-[#00FF66]/10 text-[#00FF66] border-[#00FF66]/20 font-bold">
             LOGROS Y RECONOCIMIENTOS
           </span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center gap-2 mt-3">
+        <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight text-white flex items-center gap-2 mt-3">
           <span>Insignias de Rango</span> 
           <Award className="text-[#00FF66] animate-pulse shrink-0" size={24} />
         </h1>
@@ -234,39 +234,39 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         
         {/* Unlocked badges card */}
-        <div className="bg-[#121214] border border-[#ffffff08] p-4 sm:p-5 rounded-2xl sm:rounded-3xl flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-xl sm:rounded-2xl bg-[#00FF66]/10 text-[#00FF66] flex items-center justify-center font-extrabold text-lg shrink-0">
+        <div className="bg-[#0E0E10] border border-white/[0.06] p-4 sm:p-5 rounded-2xl sm:rounded-[28px] flex items-center space-x-4">
+          <div className="w-12 h-12 rounded-xl sm:rounded-2xl bg-[#00FF66]/10 text-[#00FF66] flex items-center justify-center font-semibold text-lg shrink-0">
             {unlockedCount} / {badges.length}
           </div>
           <div>
             <h3 className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#8E8E93] font-bold">Insignias</h3>
-            <p className="text-base sm:text-lg font-extrabold text-white mt-0.5">
+            <p className="text-base sm:text-lg font-semibold text-white mt-0.5">
               {Math.round((unlockedCount / badges.length) * 100)}% Conseguido
             </p>
           </div>
         </div>
 
         {/* Current User Level card */}
-        <div className="bg-[#121214] border border-[#ffffff08] p-4 sm:p-5 rounded-2xl sm:rounded-3xl flex items-center space-x-4">
+        <div className="bg-[#0E0E10] border border-white/[0.06] p-4 sm:p-5 rounded-2xl sm:rounded-[28px] flex items-center space-x-4">
           <div className="w-12 h-12 rounded-xl sm:rounded-2xl bg-amber-400/10 text-amber-400 flex items-center justify-center text-xl shrink-0">
             ⚡
           </div>
           <div>
             <h3 className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#8E8E93] font-bold">Nivel Actual</h3>
-            <p className="text-base sm:text-lg font-extrabold text-white mt-0.5">
+            <p className="text-base sm:text-lg font-semibold text-white mt-0.5">
               Nivel {currentLevel}
             </p>
           </div>
         </div>
 
         {/* XP bonuses earned card */}
-        <div className="bg-[#121214] border border-[#ffffff08] p-4 sm:p-5 rounded-2xl sm:rounded-3xl flex items-center space-x-4">
+        <div className="bg-[#0E0E10] border border-white/[0.06] p-4 sm:p-5 rounded-2xl sm:rounded-[28px] flex items-center space-x-4">
           <div className="w-12 h-12 rounded-xl sm:rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl shrink-0">
             💎
           </div>
           <div>
             <h3 className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#8E8E93] font-bold">Bonus Acumulado</h3>
-            <p className="text-base sm:text-lg font-extrabold text-white mt-0.5">
+            <p className="text-base sm:text-lg font-semibold text-white mt-0.5">
               +{totalXPBonus} XP
             </p>
           </div>
@@ -292,7 +292,7 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border transition-all whitespace-nowrap cursor-pointer ${
                   activeFilter === btn.key
                     ? 'bg-[#00FF66] text-black border-[#00FF66] font-bold shadow-sm shadow-[#00FF66]/20'
-                    : 'bg-[#050505] border-[#ffffff10] text-[#8E8E93] hover:border-white/20'
+                    : 'bg-[#050505] border-white/[0.08] text-[#8E8E93] hover:border-white/20'
                 }`}
               >
                 {btn.label}
@@ -343,7 +343,7 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
             <div 
               key={badge.id}
               onClick={() => setSelectedBadge(badge)}
-              className={`p-5 sm:p-6 rounded-2xl sm:rounded-3xl border flex flex-col justify-between transition-all duration-300 relative overflow-hidden min-h-[240px] sm:min-h-[260px] group cursor-pointer ${
+              className={`p-5 sm:p-6 rounded-2xl sm:rounded-[28px] border flex flex-col justify-between transition-all duration-300 relative overflow-hidden min-h-[240px] sm:min-h-[260px] group cursor-pointer ${
                 badge.unlocked
                   ? isClaimed
                     ? 'bg-gradient-to-br from-[#121214] to-[#141416] border-[#00FF66]/10 shadow-sm opacity-90'
@@ -367,7 +367,7 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
                 </div>
 
                 <div className="flex flex-col items-end gap-1 shrink-0">
-                  <span className={`text-[9px] font-mono uppercase tracking-widest font-extrabold px-2 py-0.5 rounded ${
+                  <span className={`text-[9px] font-mono uppercase tracking-widest font-semibold px-2 py-0.5 rounded ${
                     badge.unlocked
                       ? isClaimed 
                         ? 'bg-slate-900 text-slate-400 border border-[#ffffff05]'
@@ -385,7 +385,7 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
 
               {/* Badge Details */}
               <div className="space-y-1 mt-4 flex-1">
-                <h3 className="text-sm sm:text-base font-extrabold text-white tracking-tight flex items-center gap-1.5">
+                <h3 className="text-sm sm:text-base font-semibold text-white tracking-tight flex items-center gap-1.5">
                   {badge.name}
                   {badge.category === 'leyenda' && <Crown className="text-amber-400 w-4 h-4 shrink-0" />}
                 </h3>
@@ -402,7 +402,7 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
                       e.stopPropagation();
                       onClaimBadge(badge.id, badge.xpReward);
                     }}
-                    className="w-full py-2 rounded-xl bg-[#00FF66] hover:bg-[#00CC52] text-black font-extrabold text-[10px] uppercase tracking-wider transition-all cursor-pointer text-center animate-pulse shadow-lg shadow-[#00FF66]/10"
+                    className="w-full py-2 rounded-xl bg-[#00FF66] hover:bg-[#00CC52] text-black font-semibold text-[10px] uppercase tracking-wider transition-all cursor-pointer text-center animate-pulse shadow-lg shadow-[#00FF66]/10"
                   >
                     Reclamar +{badge.xpReward} XP 💎
                   </button>
@@ -445,7 +445,7 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
         })}
 
         {filteredBadges.length === 0 && (
-          <div className="col-span-full text-center py-16 bg-[#121214] border border-[#ffffff08] rounded-3xl space-y-3">
+          <div className="col-span-full text-center py-16 bg-[#0E0E10] border border-white/[0.06] rounded-[28px] space-y-3">
             <div className="w-12 h-12 rounded-2xl bg-slate-900/60 text-slate-600 flex items-center justify-center mx-auto text-xl">
               🔍
             </div>
@@ -464,7 +464,7 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
           onClick={() => setSelectedBadge(null)}
         >
           <div 
-            className="bg-[#121214] border border-[#ffffff10] rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative"
+            className="bg-[#121214] border border-white/[0.08] rounded-[28px] max-w-md w-full overflow-hidden shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Top color strip */}
@@ -474,7 +474,7 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
               
               {/* Badge Icon bubble */}
               <div className="flex justify-center">
-                <div className={`p-6 rounded-3xl border ${
+                <div className={`p-6 rounded-[28px] border ${
                   selectedBadge.unlocked
                     ? 'bg-[#00FF66]/10 text-[#00FF66] border-[#00FF66]/30 shadow-lg shadow-[#00FF66]/5 animate-bounce'
                     : 'bg-slate-950 text-slate-700 border-slate-900'
@@ -495,7 +495,7 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
                     {selectedBadge.unlocked ? 'Desbloqueado 🔓' : 'Bloqueado 🔒'}
                   </span>
                 </div>
-                <h3 className="text-2xl font-extrabold text-white tracking-tight flex items-center justify-center gap-2">
+                <h3 className="text-2xl font-semibold text-white tracking-tight flex items-center justify-center gap-2">
                   {selectedBadge.name}
                 </h3>
                 <p className="text-xs font-mono text-[#8E8E93] font-bold">
@@ -531,14 +531,14 @@ export default function BadgesView({ state, onClaimBadge }: BadgesViewProps) {
                     onClaimBadge(selectedBadge.id, selectedBadge.xpReward);
                     setSelectedBadge(null);
                   }}
-                  className="w-full py-3.5 rounded-xl bg-[#00FF66] hover:bg-[#00CC52] text-black font-extrabold text-xs uppercase tracking-widest transition-all cursor-pointer text-center animate-pulse"
+                  className="w-full py-3.5 rounded-xl bg-[#00FF66] hover:bg-[#00CC52] text-black font-semibold text-xs uppercase tracking-widest transition-all cursor-pointer text-center animate-pulse"
                 >
                   Reclamar Recompensa +{selectedBadge.xpReward} XP 💎
                 </button>
               ) : (
                 <button 
                   onClick={() => setSelectedBadge(null)}
-                  className="w-full py-3.5 rounded-xl bg-white hover:bg-slate-200 text-black font-extrabold text-xs uppercase tracking-widest transition-all cursor-pointer"
+                  className="w-full py-3.5 rounded-xl bg-white hover:bg-slate-200 text-black font-semibold text-xs uppercase tracking-widest transition-all cursor-pointer"
                 >
                   Cerrar Detalle {selectedBadge.unlocked ? '(Recompensa Cobrada)' : ''}
                 </button>

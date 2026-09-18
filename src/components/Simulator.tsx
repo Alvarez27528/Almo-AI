@@ -116,7 +116,7 @@ export default function Simulator({ state }: SimulatorProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Compound Interest Sandbox */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-6 flex flex-col justify-between">
+        <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-6 flex flex-col justify-between">
           <div className="space-y-5">
             <h2 className="text-sm font-bold text-slate-200 flex items-center gap-1.5 font-mono uppercase tracking-wider">
               <Coins size={16} className="text-amber-400" />
@@ -233,7 +233,7 @@ export default function Simulator({ state }: SimulatorProps) {
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-slate-950/40 p-3 rounded-xl text-center border border-slate-800/40">
                 <span className="text-[9px] font-mono text-slate-500 uppercase block">Total Final</span>
-                <span className="text-sm font-extrabold text-emerald-400 font-mono">{formatCurrency(finalTotal, profile.currency)}</span>
+                <span className="text-sm font-semibold text-emerald-400 font-mono">{formatCurrency(finalTotal, profile.currency)}</span>
               </div>
               <div className="bg-slate-950/40 p-3 rounded-xl text-center border border-slate-800/40">
                 <span className="text-[9px] font-mono text-slate-500 uppercase block">Aportado</span>
@@ -249,7 +249,7 @@ export default function Simulator({ state }: SimulatorProps) {
         </div>
 
         {/* Goal Achiever Scenario Planner */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-6 flex flex-col justify-between">
+        <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-6 flex flex-col justify-between">
           <div className="space-y-5">
             <h2 className="text-sm font-bold text-slate-200 flex items-center gap-1.5 font-mono uppercase tracking-wider">
               {goalType === 'house' ? <Home size={16} className="text-blue-400" /> : goalType === 'car' ? <Car size={16} className="text-indigo-400" /> : <Coins size={16} className="text-emerald-400" />}
@@ -332,7 +332,7 @@ export default function Simulator({ state }: SimulatorProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="text-[9px] font-mono text-slate-500 uppercase block">Plazo Estimado</span>
-                <span className="text-xl font-extrabold text-white font-sans">{goalMonths >= 360 ? 'Inviable' : `${goalMonths} meses`}</span>
+                <span className="text-xl font-semibold text-white font-sans">{goalMonths >= 360 ? 'Inviable' : `${goalMonths} meses`}</span>
                 <span className="text-[10px] text-slate-400 font-mono block mt-0.5">({goalYears} años)</span>
               </div>
 

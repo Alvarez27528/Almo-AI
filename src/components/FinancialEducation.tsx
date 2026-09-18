@@ -20,7 +20,7 @@ export const FinancialEducation: React.FC<FinancialEducationProps> = ({ profile,
   const selectedLesson = educationContent.find(l => l.id === selectedLessonId);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl">
+    <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] shadow-xl">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <BookOpen className="text-indigo-400" />

@@ -91,7 +91,7 @@ export default function Statistics({ state }: StatisticsProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Main Chart Card (2 Cols Span) */}
-        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-6 min-h-[380px] flex flex-col justify-between">
+        <div className="lg:col-span-2 card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-6 min-h-[380px] flex flex-col justify-between">
           
           {/* Chart Header */}
           <div>
@@ -248,7 +248,7 @@ export default function Statistics({ state }: StatisticsProps) {
         {/* Side Widget: Financial score details */}
         <div className="space-y-6">
           
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4">
+          <div className="card-hover bg-[#0E0E10] border border-white/[0.06] p-6 rounded-[28px] space-y-4">
             <h3 className="text-xs font-mono text-slate-500 uppercase tracking-widest block mb-1">Ratios Clave del Diagnóstico</h3>
 
             <div className="space-y-4">
@@ -297,7 +297,7 @@ export default function Statistics({ state }: StatisticsProps) {
           </div>
 
           {/* AI diagnosis on stats */}
-          <div className="bg-gradient-to-r from-slate-900 to-emerald-950/10 border border-emerald-500/20 p-5 rounded-3xl space-y-3">
+          <div className="bg-gradient-to-r from-slate-900 to-emerald-950/10 border border-emerald-500/20 p-5 rounded-[28px] space-y-3">
             <div className="flex items-center space-x-1.5 text-emerald-400 font-mono text-xs uppercase tracking-wider">
               <Sparkles size={14} />
               <span>Análisis de Coeficientes</span>
